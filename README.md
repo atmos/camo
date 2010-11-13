@@ -1,8 +1,10 @@
 # camouflage
 
-This is an image SSL proxy to prevent mixed content warnings on secure pages served from http://github.com.
+This is an image SSL proxy to prevent mixed content warnings on secure pages served from https://github.com.
 
 We wanted to allow people to keep embedding image links in their comments and README files.  This also handles inlining google charts images.
+
+![camo](http://farm5.static.flickr.com/4116/4857328881_fefb8e2134_z.jpg)
 
 [More Info Here](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets)
 
