@@ -1,4 +1,4 @@
-# asset-proxy
+# lojack
 
 This is an image SSL proxy to prevent mixed content warnings on secure pages served from http://github.com.
 
