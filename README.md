@@ -6,13 +6,15 @@ We want to allow people to keep embedding images in comments/issues/READMEs/goog
 
 [There's more info on the GitHub blog](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets).
 
-We share a key between this proxy and the GitHub main app.  We encrypt the URL with [hmac](http://en.wikipedia.org/wiki/HMAC) so we're not an open proxy.  These keys come from the shell environment and are unique per deployment environment.  I'm not 100% sure this step is necessary.
+We share a key between this proxy and the main GitHub app.  We encrypt the URL with [hmac](http://en.wikipedia.org/wiki/HMAC) so we're not an open proxy.  The keys come from the shell environment and are unique per deployment environment.  I'm not 100% sure this step is necessary.
+
 
 When the GitHub app renders markdown it replaces all of the `src` attributes on any `img` tags with the an appropriate URL to hit the proxies.
 
 ## Testing Functionality
 
 ### Start the server
+
     % coffee server.coffee
 
 ### In another shell
@@ -33,4 +35,4 @@ To enable useful line numbers in stacktraces you probably want to
 compile the server.coffee file to native javascript when deploy
 
     % coffee -c server.coffee
-    % node server.js
+    % /usr/bin/env CAMOUFLAGE_KEY="<my application key>" node server.js
