@@ -17,6 +17,8 @@ server = Http.createServer (req, resp) ->
   else
     url = Url.parse req.url
 
+    delete(req.headers.cookie)
+
     query_digest = url.pathname.replace(/^\//, '')
     query_params = QueryString.parse(url.query)
 
@@ -86,7 +88,7 @@ server = Http.createServer (req, resp) ->
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
 console.log "Using the secret key #{shared_key}"
 
-Fs.open "tmp/camouflage.pid", "w", 0666, (err, fd) ->
+Fs.open "tmp/camo.pid", "w", 0666, (err, fd) ->
   Fs.writeSync fd, process.pid
 
 server.listen port
