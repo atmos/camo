@@ -48,6 +48,7 @@ server = Http.createServer (req, resp) ->
 
             # don't pass cookies on
             delete(srcResp.headers['set-cookie'])
+            srcResp.headers['X-Content-Type-Options'] = 'nosniff'
 
             if(content_length > 5242880)
               resp.writeHead 404, { }
