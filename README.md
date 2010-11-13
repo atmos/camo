@@ -2,9 +2,9 @@
 
 Camo is all about making insecure assets looks secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [github](https://github.com).
 
-We wanted to allow people to keep embedding image links in their comments and README files.  This also handles inlining google charts images.
+We want to allow people to keep embedding images in comments/issues/READMEs/google charting.
 
-[More Info Here](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets)
+[There's more info on the GitHub blog](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets).
 
 We share a key between this proxy and the GitHub main app.  We encrypt the URL with [hmac](http://en.wikipedia.org/wiki/HMAC) so we're not an open proxy.  These keys come from the shell environment and are unique per deployment environment.  I'm not 100% sure this step is necessary.
 
