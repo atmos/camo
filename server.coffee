@@ -4,8 +4,8 @@ Http        = require 'http'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
-port        = parseInt process.env.PORT              || 8081
-shared_key  = process.env.CAMOUFLAGE_ASSET_PROXY_KEY || '0x24FEEDFACEDEADBEEFCAFE'
+port        = parseInt process.env.PORT  || 8081
+shared_key  = process.env.CAMOUFLAGE_KEY || '0x24FEEDFACEDEADBEEFCAFE'
 
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
