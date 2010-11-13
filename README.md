@@ -2,7 +2,7 @@
 
 ![camo](http://farm5.static.flickr.com/4116/4857328881_fefb8e2134_z.jpg)
 
-Camouflage is all about making insecure assets looks secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [github](https://github.com).
+Camo is all about making insecure assets looks secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [github](https://github.com).
 
 We wanted to allow people to keep embedding image links in their comments and README files.  This also handles inlining google charts images.
 
