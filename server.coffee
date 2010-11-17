@@ -18,7 +18,7 @@ server = Http.createServer (req, resp) ->
     url = Url.parse req.url
 
     transferred_headers =
-      'Via'                    : 'GitHub Asset Proxy'
+      'Via'                    : 'Camo Asset Proxy'
       'Accept'                 : req.headers.accept
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-forwarded-for'        : req.headers['x-forwarded-for']
