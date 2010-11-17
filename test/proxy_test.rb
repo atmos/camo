@@ -50,4 +50,16 @@ class AssetProxyTest < Test::Unit::TestCase
       request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
     end
   end
+
+  def test_404s_on_host_not_found
+    assert_raise RestClient::ResourceNotFound do
+      request('http://flabergasted.cx')
+    end
+  end
+
+  def test_404s_on_non_image_content_type
+    assert_raise RestClient::ResourceNotFound do
+      request('https://github.com/atmos/cinderella/raw/master/bootstrap.sh')
+    end
+  end
 end
