@@ -23,7 +23,7 @@ server = Http.createServer (req, resp) ->
   else
     url = Url.parse req.url
 
-    four_oh_hour = (msg) ->
+    four_oh_four = (msg) ->
       log msg
       resp.writeHead 404, { }
       resp.write "Not Found"
@@ -54,7 +54,7 @@ server = Http.createServer (req, resp) ->
           src = Http.createClient url.port || 80, url.hostname
 
           src.on 'error', (error) ->
-            four_oh_hour("Client Request error #{error.stack}")
+            four_oh_four("Client Request error #{error.stack}")
 
           query_path = url.pathname
           if url.query?
@@ -72,7 +72,7 @@ server = Http.createServer (req, resp) ->
             content_length  = srcResp.headers['content-length']
 
             if(content_length > 5242880)
-              four_oh_hour("Content-Length exceeded")
+              four_oh_four("Content-Length exceeded")
             else
               newHeaders =
                 'expires'                : srcResp.headers['expires']
@@ -90,7 +90,7 @@ server = Http.createServer (req, resp) ->
               switch srcResp.statusCode
                 when 200
                   if srcResp.statusCode == 200 && newHeaders['content-type'].slice(0, 5) != 'image'
-                    four_oh_hour("Non-Image content-type returned")
+                    four_oh_four("Non-Image content-type returned")
 
                   log newHeaders
 
@@ -102,7 +102,7 @@ server = Http.createServer (req, resp) ->
                   resp.writeHead srcResp.statusCode, newHeaders
 
                 else
-                  four_oh_hour("Responded with #{srcResp.statusCode}")
+                  four_oh_four("Responded with #{srcResp.statusCode}")
 
           srcReq.on 'error', ->
             resp.end()
@@ -110,11 +110,11 @@ server = Http.createServer (req, resp) ->
           srcReq.end()
 
         else
-          four_oh_hour("No host found")
+          four_oh_four("No host found")
       else
-        four_oh_hour("checksum mismatch")
+        four_oh_four("checksum mismatch")
     else
-      four_oh_hour("No pathname provided on the server")
+      four_oh_four("No pathname provided on the server")
 
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
 console.log "Using the secret key #{shared_key}"
