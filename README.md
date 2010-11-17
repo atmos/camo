@@ -35,4 +35,4 @@ To enable useful line numbers in stacktraces you probably want to
 compile the server.coffee file to native javascript when deploying.
 
     % coffee -c server.coffee
-    % /usr/bin/env CAMOUFLAGE_KEY="<my application key>" node server.js
+    % /usr/bin/env PORT=9090 CAMO_KEY="<my application key>" node server.js
