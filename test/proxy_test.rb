@@ -7,10 +7,10 @@ require 'addressable/uri'
 
 require 'test/unit'
 
-class AssetProxyTest < Test::Unit::TestCase
+class CamoProxyTest < Test::Unit::TestCase
   def config
-    { 'key'  => "0x24FEEDFACEDEADBEEFCAFE",
-      'host' => "http://localhost:8081" }
+    { 'key'  => ENV['CAMO_KEY']  || "0x24FEEDFACEDEADBEEFCAFE",
+      'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
   end
 
   def request(image_url)

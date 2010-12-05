@@ -4,14 +4,16 @@ Http        = require 'http'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
-port       = parseInt process.env.PORT || 8081
-version    = "0.2.2"
-shared_key = process.env.CAMO_KEY      || '0x24FEEDFACEDEADBEEFCAFE'
+port            = parseInt process.env.PORT        || 8081
+version         = "0.3.0"
+shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
+logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 
 log = (msg) ->
-  console.log("--------------------------------------------")
-  console.log(msg)
-  console.log("--------------------------------------------")
+  unless logging_enabled == "disabled"
+    console.log("--------------------------------------------")
+    console.log(msg)
+    console.log("--------------------------------------------")
 
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
@@ -102,7 +104,7 @@ server = Http.createServer (req, resp) ->
                   resp.writeHead srcResp.statusCode, newHeaders
 
                 else
-                  four_oh_four("Responded with #{srcResp.statusCode}")
+                  four_oh_four("Responded with #{srcResp.statusCode}:#{srcResp.headers}")
 
           srcReq.on 'error', ->
             resp.end()
@@ -112,7 +114,7 @@ server = Http.createServer (req, resp) ->
         else
           four_oh_four("No host found")
       else
-        four_oh_four("checksum mismatch")
+        four_oh_four("checksum mismatch #{hmac_digest}:#{query_digest}")
     else
       four_oh_four("No pathname provided on the server")
 
