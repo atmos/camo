@@ -69,9 +69,11 @@ class CamoProxyTest < Test::Unit::TestCase
     end
   end
 
-  def test_404s_on_172_16_ip_range
-    assert_raise RestClient::ResourceNotFound do
-      request('http://172.16.0.1/foo.cgi')
+  16.upto(31) do |i|
+    define_method :"test_404s_on_172_#{i}_ip_range" do
+      assert_raise RestClient::ResourceNotFound do
+        request("http://172.#{i}.0.1/foo.cgi")
+      end
     end
   end
 

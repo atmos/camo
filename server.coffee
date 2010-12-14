@@ -15,11 +15,7 @@ log = (msg) ->
     console.log(msg)
     console.log("--------------------------------------------")
 
-RESTRICTED_IPS = /// ^(
-    10\.0    # 10.0.0.0/8
-   |172\.16  # 172.16.0.0/16
-   |192\.168 # 192.168.0.0/24
-) ///
+RESTRICTED_IPS = /^(10\.)|(127\.)|(192\.168)|(172\.(1[6-9])|(2[0-9])|(3[0-1]))/
 
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
