@@ -62,4 +62,22 @@ class CamoProxyTest < Test::Unit::TestCase
       request('https://github.com/atmos/cinderella/raw/master/bootstrap.sh')
     end
   end
+
+  def test_404s_on_10_0_ip_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://10.0.0.1/foo.cgi')
+    end
+  end
+
+  def test_404s_on_172_16_ip_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://172.16.0.1/foo.cgi')
+    end
+  end
+
+  def test_404s_on_192_168_ip_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://192.168.0.1/foo.cgi')
+    end
+  end
 end

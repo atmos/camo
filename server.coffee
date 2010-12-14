@@ -15,6 +15,12 @@ log = (msg) ->
     console.log(msg)
     console.log("--------------------------------------------")
 
+RESTRICTED_IPS = /// ^(
+    10\.0    # 10.0.0.0/8
+   |172\.16  # 172.16.0.0/16
+   |192\.168 # 192.168.0.0/24
+) ///
+
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
     resp.writeHead 200
@@ -52,7 +58,7 @@ server = Http.createServer (req, resp) ->
       if hmac_digest == query_digest
         url = Url.parse query_params.url
 
-        if url.host?
+        if url.host? && !url.host.match(RESTRICTED_IPS)
           src = Http.createClient url.port || 80, url.hostname
 
           src.on 'error', (error) ->
@@ -112,7 +118,7 @@ server = Http.createServer (req, resp) ->
           srcReq.end()
 
         else
-          four_oh_four("No host found")
+          four_oh_four("No host found #{url.host}")
       else
         four_oh_four("checksum mismatch #{hmac_digest}:#{query_digest}")
     else
