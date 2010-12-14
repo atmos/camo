@@ -88,4 +88,10 @@ class CamoProxyTest < Test::Unit::TestCase
       request('http://192.168.0.1/foo.cgi')
     end
   end
+
+  def test_404s_on_environmental_excludes
+    assert_raise RestClient::ResourceNotFound do
+      request('http://iphone.internal.example.org/foo.cgi')
+    end
+  end
 end

@@ -6,6 +6,7 @@ QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
 version         = "0.3.0"
+excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 
@@ -15,6 +16,7 @@ log = (msg) ->
     console.log(msg)
     console.log("--------------------------------------------")
 
+EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"))
 RESTRICTED_IPS = /^(10\.)|(127\.)|(169\.254)|(192\.168)|(172\.(1[6-9])|(2[0-9])|(3[0-1]))/
 
 server = Http.createServer (req, resp) ->
@@ -55,6 +57,9 @@ server = Http.createServer (req, resp) ->
         url = Url.parse query_params.url
 
         if url.host? && !url.host.match(RESTRICTED_IPS)
+          if url.host.match(EXCLUDED_HOSTS)
+            return four_oh_four("Hitting excluded hostnames")
+
           src = Http.createClient url.port || 80, url.hostname
 
           src.on 'error', (error) ->
