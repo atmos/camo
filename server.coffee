@@ -19,6 +19,13 @@ log = (msg) ->
 EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"))
 RESTRICTED_IPS = /^(10\.)|(127\.)|(169\.254)|(192\.168)|(172\.(1[6-9])|(2[0-9])|(3[0-1]))/
 
+total_connections   = 0
+current_connections = 0
+
+decr = ->
+  current_connections -= 1
+  current_connections  = 0 if current_connections < 1
+
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
     resp.writeHead 200
@@ -27,13 +34,15 @@ server = Http.createServer (req, resp) ->
     resp.writeHead 200
     resp.end 'ok'
   else
+    total_connections   += 1
+    current_connections += 1
     url = Url.parse req.url
 
     four_oh_four = (msg) ->
+      decr()
       log msg
-      resp.writeHead 404, { }
-      resp.write "Not Found"
-      resp.end()
+      resp.writeHead 404
+      resp.end "Not Found"
 
     transferred_headers =
       'Via'                    : process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
@@ -80,7 +89,7 @@ server = Http.createServer (req, resp) ->
 
             content_length  = srcResp.headers['content-length']
 
-            if(content_length > 5242880)
+            if content_length > 5242880
               four_oh_four("Content-Length exceeded")
             else
               newHeaders =
@@ -91,9 +100,11 @@ server = Http.createServer (req, resp) ->
                 'X-Content-Type-Options' : 'nosniff'
 
               srcResp.on 'end', ->
+                decr()
                 resp.end()
 
               srcResp.on 'error', ->
+                decr()
                 resp.end()
 
               switch srcResp.statusCode
@@ -114,6 +125,7 @@ server = Http.createServer (req, resp) ->
                   four_oh_four("Responded with #{srcResp.statusCode}:#{srcResp.headers}")
 
           srcReq.on 'error', ->
+            decr()
             resp.end()
 
           srcReq.end()
