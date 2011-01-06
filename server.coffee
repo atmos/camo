@@ -21,6 +21,7 @@ RESTRICTED_IPS = /^(10\.)|(127\.)|(169\.254)|(192\.168)|(172\.(1[6-9])|(2[0-9])|
 
 total_connections   = 0
 current_connections = 0
+started_at          = new Date
 
 four_oh_four = (resp, msg) ->
   log msg
@@ -39,6 +40,9 @@ server = Http.createServer (req, resp) ->
   else if req.url == '/favicon.ico'
     resp.writeHead 200
     resp.end 'ok'
+  else if req.url == '/status'
+    resp.writeHead 200
+    resp.end "ok #{current_connections}/#{total_connections} since #{started_at.toString()}"
   else
     total_connections   += 1
     current_connections += 1
