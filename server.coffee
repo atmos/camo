@@ -56,13 +56,22 @@ server = Http.createServer (req, resp) ->
       'x-content-type-options' : 'nosniff'
 
     delete(req.headers.cookie)
-    log(req.headers)
 
     [query_digest, dest_url...] = url.pathname.replace(/^\//, '').split("/")
     if dest_url.length > 0
+      url_type = 'path'
       dest_url = unescape(dest_url.join("/"))
     else
+      url_type = 'query'
       dest_url = QueryString.parse(url.query).url
+
+    log({
+      type:     url_type
+      url:      req.url
+      headers:  req.headers
+      dest:     dest_url
+      digest:   query_digest
+    })
 
     if url.pathname?
       hmac = Crypto.createHmac("sha1", shared_key)
