@@ -1,5 +1,6 @@
 (function() {
   var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, current_connections, excluded, finish, four_oh_four, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
+  var __slice = Array.prototype.slice;
   Fs = require('fs');
   Url = require('url');
   Http = require('http');
@@ -35,7 +36,7 @@
     return resp.end(str);
   };
   server = Http.createServer(function(req, resp) {
-    var hmac, hmac_digest, query_digest, query_params, query_path, src, srcReq, transferred_headers, url, _base;
+    var dest_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -57,15 +58,27 @@
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
-      log(req.headers);
-      query_digest = url.pathname.replace(/^\//, '');
-      query_params = QueryString.parse(url.query);
+      _ref = url.pathname.replace(/^\//, '').split("/"), query_digest = _ref[0], dest_url = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
+      if (dest_url.length > 0) {
+        url_type = 'path';
+        dest_url = unescape(dest_url.join("/"));
+      } else {
+        url_type = 'query';
+        dest_url = QueryString.parse(url.query).url;
+      }
+      log({
+        type: url_type,
+        url: req.url,
+        headers: req.headers,
+        dest: dest_url,
+        digest: query_digest
+      });
       if (url.pathname != null) {
         hmac = Crypto.createHmac("sha1", shared_key);
-        hmac.update(query_params.url);
+        hmac.update(dest_url);
         hmac_digest = hmac.digest('hex');
         if (hmac_digest === query_digest) {
-          url = Url.parse(query_params.url);
+          url = Url.parse(dest_url);
           if ((url.host != null) && !url.host.match(RESTRICTED_IPS)) {
             if (url.host.match(EXCLUDED_HOSTS)) {
               return four_oh_four(resp, "Hitting excluded hostnames");
@@ -111,7 +124,6 @@
                     return srcResp.on('data', function(chunk) {
                       return resp.write(chunk);
                     });
-                    break;
                   case 304:
                     return resp.writeHead(srcResp.statusCode, newHeaders);
                   default:
