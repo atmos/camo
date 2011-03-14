@@ -103,10 +103,14 @@ end
 class CamoProxyPathTest < Test::Unit::TestCase
   include CamoProxyTests
 
+  def hexenc(image_url)
+    image_url.to_enum(:each_byte).map { |byte| "%02x" % byte }.join
+  end
+
   def request(image_url)
     hexdigest = OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
-    encoded_image_url = URI.escape(image_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+    encoded_image_url = hexenc(image_url)
     uri = "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
     RestClient.get(uri)
   end

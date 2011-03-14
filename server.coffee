@@ -33,6 +33,14 @@ finish = (resp, str) ->
   current_connections  = 0 if current_connections < 1
   resp.end str
 
+# decode a string of two char hex digits
+hexdec = (str) ->
+  if str and str.length > 0 and str.length % 2 == 0 and not str.match(/[^0-9a-f]/)
+    buf = new Buffer(str.length / 2)
+    for i in [0...str.length] by 2
+      buf[i/2] = parseInt(str[i..i+1], 16)
+    buf.toString()
+
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
     resp.writeHead 200
@@ -57,10 +65,10 @@ server = Http.createServer (req, resp) ->
 
     delete(req.headers.cookie)
 
-    [query_digest, dest_url...] = url.pathname.replace(/^\//, '').split("/")
-    if dest_url.length > 0
+    [query_digest, encoded_url] = url.pathname.replace(/^\//, '').split("/", 2)
+    if encoded_url = hexdec(encoded_url)
       url_type = 'path'
-      dest_url = unescape(dest_url.join("/"))
+      dest_url = encoded_url
     else
       url_type = 'query'
       dest_url = QueryString.parse(url.query).url

@@ -1,6 +1,5 @@
 (function() {
-  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, current_connections, excluded, finish, four_oh_four, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
-  var __slice = Array.prototype.slice;
+  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, current_connections, excluded, finish, four_oh_four, hexdec, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
   Fs = require('fs');
   Url = require('url');
   Http = require('http');
@@ -35,8 +34,18 @@
     }
     return resp.end(str);
   };
+  hexdec = function(str) {
+    var buf, i, _ref;
+    if (str && str.length > 0 && str.length % 2 === 0 && !str.match(/[^0-9a-f]/)) {
+      buf = new Buffer(str.length / 2);
+      for (i = 0, _ref = str.length; (0 <= _ref ? i < _ref : i > _ref); i += 2) {
+        buf[i / 2] = parseInt(str.slice(i, (i + 1 + 1) || 9e9), 16);
+      }
+      return buf.toString();
+    }
+  };
   server = Http.createServer(function(req, resp) {
-    var dest_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
+    var dest_url, encoded_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -58,10 +67,10 @@
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
-      _ref = url.pathname.replace(/^\//, '').split("/"), query_digest = _ref[0], dest_url = 2 <= _ref.length ? __slice.call(_ref, 1) : [];
-      if (dest_url.length > 0) {
+      _ref = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
+      if (encoded_url = hexdec(encoded_url)) {
         url_type = 'path';
-        dest_url = unescape(dest_url.join("/"));
+        dest_url = encoded_url;
       } else {
         url_type = 'query';
         dest_url = QueryString.parse(url.query).url;

@@ -27,9 +27,11 @@ Camo supports two distinct URL formats:
     http://example.org/<digest>/<image-url>
 
 The `<digest>` is a 40 character hex encoded HMAC digest generated with a shared
-secret key and the unescaped `<image-url>` value. The `<image-url>` is the absolute
-URL locating an image. In either format, the `<image-url>` should be URL escaped
-aggressively to ensure the original value isn't mangled in transit.
+secret key and the unescaped `<image-url>` value. The `<image-url>` is the
+absolute URL locating an image. In the first format, the `<image-url>` should be
+URL escaped aggressively to ensure the original value isn't mangled in transit.
+In the second format, each byte of the `<image-url>` should be hex encoded such
+that the resulting value includes only characters `[0-9a-f]`.
 
 ## Testing Functionality
 
