@@ -58,16 +58,19 @@ server = Http.createServer (req, resp) ->
     delete(req.headers.cookie)
     log(req.headers)
 
-    query_digest = url.pathname.replace(/^\//, '')
-    query_params = QueryString.parse(url.query)
+    [query_digest, dest_url...] = url.pathname.replace(/^\//, '').split("/")
+    if dest_url.length > 0
+      dest_url = unescape(dest_url.join("/"))
+    else
+      dest_url = QueryString.parse(url.query).url
 
     if url.pathname?
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(query_params.url)
+      hmac.update(dest_url)
       hmac_digest = hmac.digest('hex')
 
       if hmac_digest == query_digest
-        url = Url.parse query_params.url
+        url = Url.parse dest_url
 
         if url.host? && !url.host.match(RESTRICTED_IPS)
           if url.host.match(EXCLUDED_HOSTS)

@@ -7,20 +7,10 @@ require 'addressable/uri'
 
 require 'test/unit'
 
-class CamoProxyTest < Test::Unit::TestCase
+module CamoProxyTests
   def config
     { 'key'  => ENV['CAMO_KEY']  || "0x24FEEDFACEDEADBEEFCAFE",
       'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
-  end
-
-  def request(image_url)
-    hexdigest = OpenSSL::HMAC.hexdigest(
-      OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
-
-    uri = Addressable::URI.parse("#{config['host']}/#{hexdigest}")
-    uri.query_values = { 'url' => image_url, 'repo' => '', 'path' => '' }
-
-    RestClient.get(uri.to_s)
   end
 
   def test_proxy_valid_image_url
@@ -93,5 +83,31 @@ class CamoProxyTest < Test::Unit::TestCase
     assert_raise RestClient::ResourceNotFound do
       request('http://iphone.internal.example.org/foo.cgi')
     end
+  end
+end
+
+class CamoProxyQueryStringTest < Test::Unit::TestCase
+  include CamoProxyTests
+
+  def request(image_url)
+    hexdigest = OpenSSL::HMAC.hexdigest(
+      OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
+
+    uri = Addressable::URI.parse("#{config['host']}/#{hexdigest}")
+    uri.query_values = { 'url' => image_url, 'repo' => '', 'path' => '' }
+
+    RestClient.get(uri.to_s)
+  end
+end
+
+class CamoProxyPathTest < Test::Unit::TestCase
+  include CamoProxyTests
+
+  def request(image_url)
+    hexdigest = OpenSSL::HMAC.hexdigest(
+      OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
+    encoded_image_url = URI.escape(image_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+    uri = "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
+    RestClient.get(uri)
   end
 end
