@@ -18,7 +18,7 @@
     }
   };
   EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"));
-  RESTRICTED_IPS = /^(10\.)|(127\.)|(169\.254)|(192\.168)|(172\.(1[6-9])|(2[0-9])|(3[0-1]))/;
+  RESTRICTED_IPS = /^((10\.)|(127\.)|(169\.254)|(192\.168)|(172\.((1[6-9])|(2[0-9])|(3[0-1]))))/;
   total_connections = 0;
   current_connections = 0;
   started_at = new Date;
@@ -38,7 +38,7 @@
     var buf, i, _ref;
     if (str && str.length > 0 && str.length % 2 === 0 && !str.match(/[^0-9a-f]/)) {
       buf = new Buffer(str.length / 2);
-      for (i = 0, _ref = str.length; (0 <= _ref ? i < _ref : i > _ref); i += 2) {
+      for (i = 0, _ref = str.length; 0 <= _ref ? i < _ref : i > _ref; i += 2) {
         buf[i / 2] = parseInt(str.slice(i, (i + 1 + 1) || 9e9), 16);
       }
       return buf.toString();
