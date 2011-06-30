@@ -8,6 +8,7 @@ port            = parseInt process.env.PORT        || 8081
 version         = "0.3.0"
 excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
+camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 
 log = (msg) ->
@@ -121,6 +122,7 @@ server = Http.createServer (req, resp) ->
                 'content-type'           : srcResp.headers['content-type']
                 'cache-control'          : srcResp.headers['cache-control']
                 'content-length'         : content_length
+                'Camo-Host'              : camo_hostname
                 'X-Content-Type-Options' : 'nosniff'
 
               srcResp.on 'end', ->

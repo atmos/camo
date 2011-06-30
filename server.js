@@ -1,5 +1,5 @@
 (function() {
-  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, current_connections, excluded, finish, four_oh_four, hexdec, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
+  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, camo_hostname, current_connections, excluded, finish, four_oh_four, hexdec, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
   Fs = require('fs');
   Url = require('url');
   Http = require('http');
@@ -9,6 +9,7 @@
   version = "0.3.0";
   excluded = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org';
   shared_key = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE';
+  camo_hostname = process.env.CAMO_HOSTNAME || "unknown";
   logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled";
   log = function(msg) {
     if (logging_enabled !== "disabled") {
@@ -115,6 +116,7 @@
                   'content-type': srcResp.headers['content-type'],
                   'cache-control': srcResp.headers['cache-control'],
                   'content-length': content_length,
+                  'Camo-Host': camo_hostname,
                   'X-Content-Type-Options': 'nosniff'
                 };
                 srcResp.on('end', function() {
