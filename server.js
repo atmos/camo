@@ -35,10 +35,10 @@
     return resp.end(str);
   };
   hexdec = function(str) {
-    var buf, i, _ref, _step;
+    var buf, i, _ref;
     if (str && str.length > 0 && str.length % 2 === 0 && !str.match(/[^0-9a-f]/)) {
       buf = new Buffer(str.length / 2);
-      for (i = 0, _ref = str.length, _step = 2; 0 <= _ref ? i < _ref : i > _ref; i += _step) {
+      for (i = 0, _ref = str.length; 0 <= _ref ? i < _ref : i > _ref; i += 2) {
         buf[i / 2] = parseInt(str.slice(i, (i + 1 + 1) || 9e9), 16);
       }
       return buf.toString();
@@ -118,6 +118,9 @@
                   'X-Content-Type-Options': 'nosniff'
                 };
                 srcResp.on('end', function() {
+                  return finish(resp);
+                });
+                srcResp.on('error', function() {
                   return finish(resp);
                 });
                 switch (srcResp.statusCode) {

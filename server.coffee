@@ -126,8 +126,8 @@ server = Http.createServer (req, resp) ->
               srcResp.on 'end', ->
                 finish resp
 
-              # srcResp.on 'error', ->
-              #   finish resp
+              srcResp.on 'error', ->
+                finish resp
 
               switch srcResp.statusCode
                 when 200
