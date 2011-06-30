@@ -146,8 +146,8 @@ server = Http.createServer (req, resp) ->
                 else
                   four_oh_four(resp, "Responded with #{srcResp.statusCode}:#{srcResp.headers}")
 
-          srcReq.on 'error', ->
-            finish resp
+          # srcReq.on 'error', ->
+          #   finish resp
 
           srcReq.end()
 
