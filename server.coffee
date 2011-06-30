@@ -31,7 +31,7 @@ four_oh_four = (resp, msg) ->
 finish = (resp, str) ->
   current_connections -= 1
   current_connections  = 0 if current_connections < 1
-  resp.end str
+  resp.connection && resp.end str
 
 # decode a string of two char hex digits
 hexdec = (str) ->
