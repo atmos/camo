@@ -28,17 +28,6 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
-  def test_hmac_update_obscure_error
-    urls = [
-     "http://share.kyleneath.com/captures/Testing_-_TestingAppDelegate.m-20110309-142723.png",
-     "http://cdn.shopify.com/s/files/1/0051/4802/products/featured_2.jpg?1287582804"
-    ]
-    urls.each do |url|
-      response = request(url)
-      assert_equal(200, response.code)
-    end
-  end
-
   def test_404s_on_urls_without_an_http_host
     assert_raise RestClient::ResourceNotFound do
       request('/picture/Mincemeat/Pimp.jpg')
@@ -105,14 +94,18 @@ end
 class CamoProxyQueryStringTest < Test::Unit::TestCase
   include CamoProxyTests
 
-  def request(image_url)
+  def request_uri(image_url)
     hexdigest = OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
 
     uri = Addressable::URI.parse("#{config['host']}/#{hexdigest}")
     uri.query_values = { 'url' => image_url, 'repo' => '', 'path' => '' }
 
-    RestClient.get(uri.to_s)
+    uri.to_s
+  end
+
+  def request(image_url)
+    RestClient.get(request_uri(image_url))
   end
 end
 
@@ -123,11 +116,14 @@ class CamoProxyPathTest < Test::Unit::TestCase
     image_url.to_enum(:each_byte).map { |byte| "%02x" % byte }.join
   end
 
-  def request(image_url)
+  def request_uri(image_url)
     hexdigest = OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
     encoded_image_url = hexenc(image_url)
-    uri = "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
-    RestClient.get(uri)
+    "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
+  end
+
+  def request(image_url)
+    RestClient.get(request_uri(image_url))
   end
 end

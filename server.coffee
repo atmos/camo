@@ -66,8 +66,7 @@ server = Http.createServer (req, resp) ->
 
     delete(req.headers.cookie)
 
-    pathname = url.pathname.replace(/&amp;/, '&')
-    [query_digest, encoded_url] = pathname.replace(/^\//, '').split("/", 2)
+    [query_digest, encoded_url] = url.pathname.replace(/^\//, '').split("/", 2)
     if encoded_url = hexdec(encoded_url)
       url_type = 'path'
       dest_url = encoded_url
@@ -83,12 +82,9 @@ server = Http.createServer (req, resp) ->
       digest:   query_digest
     })
 
-    if url.pathname?
+    if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      try
-        hmac.update(dest_url)
-      catch error
-        console.log "Error on #{req.url} - #{dest_url}"
+      hmac.update(dest_url)
 
       hmac_digest = hmac.digest('hex')
 

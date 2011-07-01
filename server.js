@@ -46,7 +46,7 @@
     }
   };
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, pathname, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
+    var dest_url, encoded_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -68,8 +68,7 @@
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
-      pathname = url.pathname.replace(/&amp;/, '&');
-      _ref = pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
+      _ref = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
       if (encoded_url = hexdec(encoded_url)) {
         url_type = 'path';
         dest_url = encoded_url;
@@ -84,13 +83,9 @@
         dest: dest_url,
         digest: query_digest
       });
-      if (url.pathname != null) {
+      if ((url.pathname != null) && dest_url) {
         hmac = Crypto.createHmac("sha1", shared_key);
-        try {
-          hmac.update(dest_url);
-        } catch (error) {
-          console.log("Error on " + req.url + " - " + dest_url);
-        }
+        hmac.update(dest_url);
         hmac_digest = hmac.digest('hex');
         if (hmac_digest === query_digest) {
           url = Url.parse(dest_url);
