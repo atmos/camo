@@ -94,14 +94,18 @@ end
 class CamoProxyQueryStringTest < Test::Unit::TestCase
   include CamoProxyTests
 
-  def request(image_url)
+  def request_uri(image_url)
     hexdigest = OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
 
     uri = Addressable::URI.parse("#{config['host']}/#{hexdigest}")
     uri.query_values = { 'url' => image_url, 'repo' => '', 'path' => '' }
 
-    RestClient.get(uri.to_s)
+    uri.to_s
+  end
+
+  def request(image_url)
+    RestClient.get(request_uri(image_url))
   end
 end
 
@@ -112,11 +116,14 @@ class CamoProxyPathTest < Test::Unit::TestCase
     image_url.to_enum(:each_byte).map { |byte| "%02x" % byte }.join
   end
 
-  def request(image_url)
+  def request_uri(image_url)
     hexdigest = OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest::Digest.new('sha1'), config['key'], image_url)
     encoded_image_url = hexenc(image_url)
-    uri = "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
-    RestClient.get(uri)
+    "#{config['host']}/#{hexdigest}/#{encoded_image_url}"
+  end
+
+  def request(image_url)
+    RestClient.get(request_uri(image_url))
   end
 end

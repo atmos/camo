@@ -82,9 +82,10 @@ server = Http.createServer (req, resp) ->
       digest:   query_digest
     })
 
-    if url.pathname?
+    if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
       hmac.update(dest_url)
+
       hmac_digest = hmac.digest('hex')
 
       if hmac_digest == query_digest
