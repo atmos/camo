@@ -8,6 +8,8 @@ We want to allow people to keep embedding images in comments/issues/READMEs/goog
 
 Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
+Camo currently runs on node version 0.4.8 in production at GitHub.
+
 Features
 --------
 
