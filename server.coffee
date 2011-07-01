@@ -84,7 +84,11 @@ server = Http.createServer (req, resp) ->
 
     if url.pathname?
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url)
+      try
+        hmac.update(dest_url)
+      catch error
+        console.log "Error on #{req.url} - #{dest_url}"
+
       hmac_digest = hmac.digest('hex')
 
       if hmac_digest == query_digest
