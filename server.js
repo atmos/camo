@@ -46,7 +46,7 @@
     }
   };
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
+    var dest_url, encoded_url, hmac, hmac_digest, pathname, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -68,7 +68,8 @@
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
-      _ref = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
+      pathname = url.pathname.replace(/&amp;/, '&');
+      _ref = pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
       if (encoded_url = hexdec(encoded_url)) {
         url_type = 'path';
         dest_url = encoded_url;

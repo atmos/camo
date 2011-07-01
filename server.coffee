@@ -66,7 +66,8 @@ server = Http.createServer (req, resp) ->
 
     delete(req.headers.cookie)
 
-    [query_digest, encoded_url] = url.pathname.replace(/^\//, '').split("/", 2)
+    pathname = url.pathname.replace(/&amp;/, '&')
+    [query_digest, encoded_url] = pathname.replace(/^\//, '').split("/", 2)
     if encoded_url = hexdec(encoded_url)
       url_type = 'path'
       dest_url = encoded_url

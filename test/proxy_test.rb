@@ -28,6 +28,17 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_hmac_update_obscure_error
+    urls = [
+     "http://share.kyleneath.com/captures/Testing_-_TestingAppDelegate.m-20110309-142723.png",
+     "http://cdn.shopify.com/s/files/1/0051/4802/products/featured_2.jpg?1287582804"
+    ]
+    urls.each do |url|
+      response = request(url)
+      assert_equal(200, response.code)
+    end
+  end
+
   def test_404s_on_urls_without_an_http_host
     assert_raise RestClient::ResourceNotFound do
       request('/picture/Mincemeat/Pimp.jpg')
