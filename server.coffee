@@ -125,7 +125,10 @@ server = Http.createServer (req, resp) ->
                 'content-length'         : content_length
                 'Camo-Host'              : camo_hostname
                 'X-Content-Type-Options' : 'nosniff'
-
+                
+              if srcResp.headers['content-encoding']
+                newHeaders['content-encoding'] = srcResp.headers['content-encoding']
+                
               srcResp.on 'end', ->
                 finish resp
 
