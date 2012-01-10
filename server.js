@@ -1,17 +1,30 @@
 (function() {
-  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, camo_hostname, current_connections, excluded, finish, four_oh_four, hexdec, log, logging_enabled, port, server, shared_key, started_at, total_connections, version;
+  var Crypto, EXCLUDED_HOSTS, Fs, Http, QueryString, RESTRICTED_IPS, Url, camo_hostname, current_connections, excluded, finish, four_oh_four, hexdec, log, logging_enabled, max_redirects, port, process_url, server, shared_key, started_at, total_connections, version;
+
   Fs = require('fs');
+
   Url = require('url');
+
   Http = require('http');
+
   Crypto = require('crypto');
+
   QueryString = require('querystring');
+
   port = parseInt(process.env.PORT || 8081);
+
   version = "0.3.0";
+
   excluded = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org';
+
   shared_key = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE';
+
   camo_hostname = process.env.CAMO_HOSTNAME || "unknown";
+
   logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled";
+
   max_redirects = process.env.CAMO_MAX_REDIRECTS || 10;
+
   log = function(msg) {
     if (logging_enabled !== "disabled") {
       console.log("--------------------------------------------");
@@ -19,52 +32,47 @@
       return console.log("--------------------------------------------");
     }
   };
+
   EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"));
+
   RESTRICTED_IPS = /^((10\.)|(127\.)|(169\.254)|(192\.168)|(172\.((1[6-9])|(2[0-9])|(3[0-1]))))/;
+
   total_connections = 0;
+
   current_connections = 0;
+
   started_at = new Date;
+
   four_oh_four = function(resp, msg) {
     log(msg);
     resp.writeHead(404);
     return finish(resp, "Not Found");
   };
+
   finish = function(resp, str) {
     current_connections -= 1;
-    if (current_connections < 1) {
-      current_connections = 0;
-    }
+    if (current_connections < 1) current_connections = 0;
     return resp.connection && resp.end(str);
   };
-  hexdec = function(str) {
-    var buf, i, _ref, _step;
-    if (str && str.length > 0 && str.length % 2 === 0 && !str.match(/[^0-9a-f]/)) {
-      buf = new Buffer(str.length / 2);
-      for (i = 0, _ref = str.length, _step = 2; 0 <= _ref ? i < _ref : i > _ref; i += _step) {
-        buf[i / 2] = parseInt(str.slice(i, (i + 1 + 1) || 9e9), 16);
-      }
-      return buf.toString();
-    }
-  };
+
   process_url = function(url, transferred_headers, resp, remaining_redirects) {
+    var query_path, src, srcReq;
     if ((url.host != null) && !url.host.match(RESTRICTED_IPS)) {
       if (url.host.match(EXCLUDED_HOSTS)) {
         return four_oh_four(resp, "Hitting excluded hostnames");
       }
-      var src = Http.createClient(url.port || 80, url.hostname);
+      src = Http.createClient(url.port || 80, url.hostname);
       src.on('error', function(error) {
         return four_oh_four(resp, "Client Request error " + error.stack);
       });
-      var query_path = url.pathname;
-      if (url.query != null) {
-        query_path += "?" + url.query;
-      }
+      query_path = url.pathname;
+      if (url.query != null) query_path += "?" + url.query;
       transferred_headers.host = url.host;
       log(transferred_headers);
-      var srcReq = src.request('GET', query_path, transferred_headers);
+      srcReq = src.request('GET', query_path, transferred_headers);
       srcReq.on('response', function(srcResp) {
-        var content_length, newHeaders;
-        var is_finished = true;
+        var content_length, is_finished, newHeaders;
+        is_finished = true;
         log(srcResp.headers);
         content_length = srcResp.headers['content-length'];
         if (content_length > 5242880) {
@@ -78,23 +86,19 @@
             'Camo-Host': camo_hostname,
             'X-Content-Type-Options': 'nosniff'
           };
-           if (srcResp.headers['content-encoding']) {
+          if (srcResp.headers['content-encoding']) {
             newHeaders['content-encoding'] = srcResp.headers['content-encoding'];
           }
           srcResp.on('end', function() {
-            if (is_finished) {
-              return finish(resp);
-            }
+            if (is_finished) return finish(resp);
           });
           srcResp.on('error', function() {
-            if (is_finished) {
-              return finish(resp);
-            }
+            if (is_finished) return finish(resp);
           });
           switch (srcResp.statusCode) {
             case 200:
               if (newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) !== 'image') {
-                return four_oh_four(resp, "Non-Image content-type returned");
+                four_oh_four(resp, "Non-Image content-type returned");
               }
               log(newHeaders);
               resp.writeHead(srcResp.statusCode, newHeaders);
@@ -103,10 +107,10 @@
               });
             case 301:
               if (remaining_redirects <= 0) {
-                return four_oh_four(resp, "Exceeded max depth");
+                four_oh_four(resp, "Exceeded max depth");
               }
               is_finished = false;
-              var url = Url.parse(srcResp.headers['location']);
+              url = Url.parse(srcResp.headers['location']);
               return process_url(url, transferred_headers, resp, remaining_redirects - 1);
             case 304:
               return resp.writeHead(srcResp.statusCode, newHeaders);
@@ -123,8 +127,20 @@
       return four_oh_four(resp, "No host found " + url.host);
     }
   };
+
+  hexdec = function(str) {
+    var buf, i, _ref;
+    if (str && str.length > 0 && str.length % 2 === 0 && !str.match(/[^0-9a-f]/)) {
+      buf = new Buffer(str.length / 2);
+      for (i = 0, _ref = str.length; i < _ref; i += 2) {
+        buf[i / 2] = parseInt(str.slice(i, (i + 1) + 1 || 9e9), 16);
+      }
+      return buf.toString();
+    }
+  };
+
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, query_digest, query_path, src, srcReq, transferred_headers, url, url_type, _base, _ref;
+    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferred_headers, url, url_type, _base, _ref;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -176,10 +192,15 @@
       }
     }
   });
+
   console.log("SSL-Proxy running on " + port + " with pid:" + process.pid + ".");
+
   console.log("Using the secret key " + shared_key);
+
   Fs.open("tmp/camo.pid", "w", 0600, function(err, fd) {
     return Fs.writeSync(fd, process.pid);
   });
+
   server.listen(port);
+
 }).call(this);
