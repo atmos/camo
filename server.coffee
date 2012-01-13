@@ -8,9 +8,9 @@ port            = parseInt process.env.PORT        || 8081
 version         = "0.3.0"
 excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
+max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-max_redirects = process.env.CAMO_MAX_REDIRECTS     || 10;
 
 log = (msg) ->
   unless logging_enabled == "disabled"
