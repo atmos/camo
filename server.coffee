@@ -92,10 +92,10 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.on 'data', (chunk) ->
               resp.write chunk
-          when 301
+          when 301, 302
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
-            is_finished = false;
+            is_finished = false
             url = Url.parse srcResp.headers['location']
             process_url url, transferred_headers, resp, remaining_redirects - 1
           when 304
