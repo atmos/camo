@@ -5,7 +5,7 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "0.3.0"
+version         = "0.3.1"
 excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
@@ -56,14 +56,14 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     srcReq = src.request 'GET', query_path, transferred_headers
 
     srcReq.on 'response', (srcResp) ->
-      is_finished = true;
+      is_finished = true
 
       log srcResp.headers
 
       content_length = srcResp.headers['content-length']
 
       if content_length > 5242880
-        four_oh_four(resp, "Content-Length exceeded");
+        four_oh_four(resp, "Content-Length exceeded")
       else
         newHeaders =
             'expires'                   : srcResp.headers['expires']
@@ -105,7 +105,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     srcReq.on 'error', ->
       finish resp
 
-    srcReq.end();
+    srcReq.end()
   else
     four_oh_four(resp, "No host found " + url.host)
 
