@@ -1,4 +1,4 @@
-0.3.1
+0.5.0
 =====
 
 * Follow redirects to a configurable depth
