@@ -71,7 +71,7 @@
       log(transferred_headers);
       srcReq = src.request('GET', query_path, transferred_headers);
       srcReq.on('response', function(srcResp) {
-        var content_length, is_finished, newHeaders;
+        var content_length, is_finished, newHeaders, newUrl;
         is_finished = true;
         log(srcResp.headers);
         content_length = srcResp.headers['content-length'];
@@ -111,8 +111,12 @@
                 four_oh_four(resp, "Exceeded max depth");
               }
               is_finished = false;
-              url = Url.parse(srcResp.headers['location']);
-              return process_url(url, transferred_headers, resp, remaining_redirects - 1);
+              newUrl = Url.parse(srcResp.headers['location']);
+              if (!((newUrl.host != null) && (newUrl.hostname != null))) {
+                newUrl.host = newUrl.hostname = url.hostname;
+                newUrl.protocol = url.protocol;
+              }
+              return process_url(newUrl, transferred_headers, resp, remaining_redirects - 1);
             case 304:
               return resp.writeHead(srcResp.statusCode, newHeaders);
             default:
