@@ -108,15 +108,18 @@
             case 301:
             case 302:
               if (remaining_redirects <= 0) {
-                four_oh_four(resp, "Exceeded max depth");
+                return four_oh_four(resp, "Exceeded max depth");
+              } else {
+                is_finished = false;
+                newUrl = Url.parse(srcResp.headers['location']);
+                if (!((newUrl.host != null) && (newUrl.hostname != null))) {
+                  newUrl.host = newUrl.hostname = url.hostname;
+                  newUrl.protocol = url.protocol;
+                }
+                console.log(newUrl);
+                return process_url(newUrl, transferred_headers, resp, remaining_redirects - 1);
               }
-              is_finished = false;
-              newUrl = Url.parse(srcResp.headers['location']);
-              if (!((newUrl.host != null) && (newUrl.hostname != null))) {
-                newUrl.host = newUrl.hostname = url.hostname;
-                newUrl.protocol = url.protocol;
-              }
-              return process_url(newUrl, transferred_headers, resp, remaining_redirects - 1);
+              break;
             case 304:
               return resp.writeHead(srcResp.statusCode, newHeaders);
             default:
