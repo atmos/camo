@@ -95,13 +95,15 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
           when 301, 302
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
-            is_finished = false
-            newUrl = Url.parse srcResp.headers['location']
-            unless newUrl.host? and newUrl.hostname?
-              newUrl.host = newUrl.hostname = url.hostname
-              newUrl.protocol = url.protocol
+            else
+              is_finished = false
+              newUrl = Url.parse srcResp.headers['location']
+              unless newUrl.host? and newUrl.hostname?
+                newUrl.host = newUrl.hostname = url.hostname
+                newUrl.protocol = url.protocol
 
-            process_url newUrl, transferred_headers, resp, remaining_redirects - 1
+              console.log newUrl
+              process_url newUrl, transferred_headers, resp, remaining_redirects - 1
           when 304
             resp.writeHead srcResp.statusCode, newHeaders
           else
