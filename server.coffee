@@ -96,8 +96,12 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
             is_finished = false
-            url = Url.parse srcResp.headers['location']
-            process_url url, transferred_headers, resp, remaining_redirects - 1
+            newUrl = Url.parse srcResp.headers['location']
+            unless newUrl.host? and newUrl.hostname?
+              newUrl.host = newUrl.hostname = url.hostname
+              newUrl.protocol = url.protocol
+
+            process_url newUrl, transferred_headers, resp, remaining_redirects - 1
           when 304
             resp.writeHead srcResp.statusCode, newHeaders
           else

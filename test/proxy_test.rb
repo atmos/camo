@@ -4,6 +4,7 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
+require 'ruby-debug'
 
 require 'test/unit'
 
@@ -33,6 +34,17 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_follows_redirects_formatted_strangely
+    response = request('http://cl.ly/DPcp/Screen%20Shot%202012-01-17%20at%203.42.32%20PM.png')
+    assert_equal(200, response.code)
+  end
+
+  def test_follows_redirects_with_path_only_location_headers
+    assert_nothing_raised do
+      request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
+    end
+  end
+
   def test_404s_on_infinidirect
     assert_raise RestClient::ResourceNotFound do
       request('http://modeselektor.herokuapp.com/')
@@ -48,12 +60,6 @@ module CamoProxyTests
   def test_404s_on_images_greater_than_5_megabytes
     assert_raise RestClient::ResourceNotFound do
       request('http://apod.nasa.gov/apod/image/0505/larryslookout_spirit_big.jpg')
-    end
-  end
-
-  def test_404s_on_redirects
-    assert_raise RestClient::ResourceNotFound do
-      request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
     end
   end
 
