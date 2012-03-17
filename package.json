@@ -2,5 +2,8 @@
   "name": "camo",
   "version": "0.0.1",
   "dependencies": {
+  },
+  "engines": {
+    "node": ">=0.4.10 <0.5.0"
   }
 }
