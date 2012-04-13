@@ -66,7 +66,6 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         four_oh_four(resp, "Content-Length exceeded")
       else
         newHeaders =
-          'expires'                : srcResp.headers['expires']
           'content-type'           : srcResp.headers['content-type']
           'cache-control'          : srcResp.headers['cache-control']
           'content-length'         : content_length
