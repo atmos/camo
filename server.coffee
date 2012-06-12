@@ -181,7 +181,7 @@ server = Http.createServer (req, resp) ->
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
 console.log "Using the secret key #{shared_key}"
 
-Fs.open "tmp/camo.pid", "w", 0600, (err, fd) ->
+Fs.open "tmp/camo.pid", "w", 0o600, (err, fd) ->
   Fs.writeSync fd, process.pid
 
 server.listen port
