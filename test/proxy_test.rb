@@ -29,6 +29,11 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_proxy_valid_google_apps_image
+    response = request('http://www.igvita.com/posts/12/spdyproxy-diagram.png')
+    assert_equal(200, response.code)
+  end
+
   def test_follows_redirects
     response = request('http://cl.ly/1K0X2Y2F1P0o3z140p0d/boom-headshot.gif')
     assert_equal(200, response.code)
