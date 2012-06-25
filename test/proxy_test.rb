@@ -29,7 +29,7 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
-  def test_proxy_valid_google_apps_image
+  def test_proxy_valid_chunked_image_file
     response = request('http://www.igvita.com/posts/12/spdyproxy-diagram.png')
     assert_equal(200, response.code)
   end
