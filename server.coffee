@@ -72,6 +72,11 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
 
+        # Handle chunked responses properly
+        if content_length?
+          newHeaders['content-length'] = content_length
+        if srcResp.headers['transfer-encoding']
+          newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
         if srcResp.headers['content-encoding']
           newHeaders['content-encoding'] = srcResp.headers['content-encoding']
 
