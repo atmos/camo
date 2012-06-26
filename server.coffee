@@ -72,6 +72,11 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
 
+        # Handle chunked responses properly
+        if content_length?
+          newHeaders['content-length'] = content_length
+        if srcResp.headers['transfer-encoding']
+          newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
         if srcResp.headers['content-encoding']
           newHeaders['content-encoding'] = srcResp.headers['content-encoding']
 
@@ -180,7 +185,7 @@ server = Http.createServer (req, resp) ->
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
 console.log "Using the secret key #{shared_key}"
 
-Fs.open "tmp/camo.pid", "w", 0600, (err, fd) ->
+Fs.open "tmp/camo.pid", "w", 0o600, (err, fd) ->
   Fs.writeSync fd, process.pid
 
 server.listen port
