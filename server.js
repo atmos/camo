@@ -86,7 +86,6 @@
           newHeaders = {
             'content-type': srcResp.headers['content-type'],
             'cache-control': srcResp.headers['cache-control'] || 'public, max-age=31536000',
-            'content-length': content_length,
             'Camo-Host': camo_hostname,
             'X-Content-Type-Options': 'nosniff'
           };
