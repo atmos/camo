@@ -85,6 +85,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         srcResp.on 'error', ->
           if is_finished
             finish resp
+
         switch srcResp.statusCode
           when 200
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
@@ -95,7 +96,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.on 'data', (chunk) ->
               resp.write chunk
-          when 301, 302
+          when 301, 302, 303, 307
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
             else
@@ -140,9 +141,11 @@ server = Http.createServer (req, resp) ->
     total_connections   += 1
     current_connections += 1
     url = Url.parse req.url
+    user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
     transferred_headers =
-      'Via'                    : process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
+      'Via'                    : user_agent
+      'User-Agent'             : user_agent
       'Accept'                 : req.headers.accept
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-forwarded-for'        : req.headers['x-forwarded-for']
