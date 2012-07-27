@@ -120,6 +120,8 @@
               });
             case 301:
             case 302:
+            case 303:
+            case 307:
               if (remaining_redirects <= 0) {
                 return four_oh_four(resp, "Exceeded max depth");
               } else {

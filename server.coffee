@@ -85,6 +85,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         srcResp.on 'error', ->
           if is_finished
             finish resp
+
         switch srcResp.statusCode
           when 200
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
@@ -95,7 +96,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.on 'data', (chunk) ->
               resp.write chunk
-          when 301, 302
+          when 301, 302, 303, 307
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
             else
