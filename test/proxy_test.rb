@@ -32,6 +32,7 @@ module CamoProxyTests
   def test_proxy_valid_chunked_image_file
     response = request('http://www.igvita.com/posts/12/spdyproxy-diagram.png')
     assert_equal(200, response.code)
+    assert_nil(response.headers[:content_length])
   end
 
   def test_follows_redirects
@@ -110,6 +111,11 @@ module CamoProxyTests
     assert_raise RestClient::ResourceNotFound do
       request('http://iphone.internal.example.org/foo.cgi')
     end
+  end
+
+  def test_follows_temporary_redirects
+    response = request('http://d.pr/i/rr7F+')
+    assert_equal(200, response.code)
   end
 end
 
