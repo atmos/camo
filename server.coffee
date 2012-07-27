@@ -141,9 +141,11 @@ server = Http.createServer (req, resp) ->
     total_connections   += 1
     current_connections += 1
     url = Url.parse req.url
+    user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
     transferred_headers =
-      'Via'                    : process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
+      'Via'                    : user_agent
+      'User-Agent'             : user_agent
       'Accept'                 : req.headers.accept
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-forwarded-for'        : req.headers['x-forwarded-for']
