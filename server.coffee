@@ -37,82 +37,81 @@ finish = (resp, str) ->
   resp.connection && resp.end str
 
 fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
-    src = Http.createClient url.port || 80, ip_address
+  src = Http.createClient url.port || 80, ip_address
 
-    src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}")
+  src.on 'error', (error) ->
+    four_oh_four(resp, "Client Request error #{error.stack}")
 
-    query_path = url.pathname
-    if url.query?
-      query_path += "?#{url.query}"
+  query_path = url.pathname
+  if url.query?
+    query_path += "?#{url.query}"
 
-    transferred_headers.host = url.host
+  transferred_headers.host = url.host
 
-    log transferred_headers
+  log transferred_headers
 
-    srcReq = src.request 'GET', query_path, transferred_headers
+  srcReq = src.request 'GET', query_path, transferred_headers
 
-    srcReq.on 'response', (srcResp) ->
-      is_finished = true
+  srcReq.on 'response', (srcResp) ->
+    is_finished = true
 
-      log srcResp.headers
+    log srcResp.headers
 
-      content_length = srcResp.headers['content-length']
+    content_length = srcResp.headers['content-length']
 
-      if content_length > 5242880
-        four_oh_four(resp, "Content-Length exceeded")
-      else
-        newHeaders =
-          'content-type'           : srcResp.headers['content-type']
-          'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
-          'Camo-Host'              : camo_hostname
-          'X-Content-Type-Options' : 'nosniff'
+    if content_length > 5242880
+      four_oh_four(resp, "Content-Length exceeded")
+    else
+      newHeaders =
+        'content-type'           : srcResp.headers['content-type']
+        'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
+        'Camo-Host'              : camo_hostname
+        'X-Content-Type-Options' : 'nosniff'
 
-        # Handle chunked responses properly
-        if content_length?
-          newHeaders['content-length'] = content_length
-        if srcResp.headers['transfer-encoding']
-          newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
-        if srcResp.headers['content-encoding']
-          newHeaders['content-encoding'] = srcResp.headers['content-encoding']
+      # Handle chunked responses properly
+      if content_length?
+        newHeaders['content-length'] = content_length
+      if srcResp.headers['transfer-encoding']
+        newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
+      if srcResp.headers['content-encoding']
+        newHeaders['content-encoding'] = srcResp.headers['content-encoding']
 
-        srcResp.on 'end', ->
-          if is_finished
-            finish resp
-        srcResp.on 'error', ->
-          if is_finished
-            finish resp
+      srcResp.on 'end', ->
+        if is_finished
+          finish resp
+      srcResp.on 'error', ->
+        if is_finished
+          finish resp
 
-        switch srcResp.statusCode
-          when 200
-            if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
-              four_oh_four(resp, "Non-Image content-type returned")
+      switch srcResp.statusCode
+        when 200
+          if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
+            four_oh_four(resp, "Non-Image content-type returned")
 
-            log newHeaders
+          log newHeaders
 
-            resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.on 'data', (chunk) ->
-              resp.write chunk
-          when 301, 302, 303, 307
-            if remaining_redirects <= 0
-              four_oh_four(resp, "Exceeded max depth")
-            else
-              is_finished = false
-              newUrl = Url.parse srcResp.headers['location']
-              unless newUrl.host? and newUrl.hostname?
-                newUrl.host = newUrl.hostname = url.hostname
-                newUrl.protocol = url.protocol
-
-              console.log newUrl
-              process_url newUrl, transferred_headers, resp, remaining_redirects - 1
-          when 304
-            resp.writeHead srcResp.statusCode, newHeaders
+          resp.writeHead srcResp.statusCode, newHeaders
+          srcResp.on 'data', (chunk) ->
+            resp.write chunk
+        when 301, 302, 303, 307
+          if remaining_redirects <= 0
+            four_oh_four(resp, "Exceeded max depth")
           else
-            four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
-    srcReq.on 'error', ->
-      finish resp
+            is_finished = false
+            newUrl = Url.parse srcResp.headers['location']
+            unless newUrl.host? and newUrl.hostname?
+              newUrl.host = newUrl.hostname = url.hostname
+              newUrl.protocol = url.protocol
 
-    srcReq.end()
+            process_url newUrl, transferred_headers, resp, remaining_redirects - 1
+        when 304
+          resp.writeHead srcResp.statusCode, newHeaders
+        else
+          four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
+  srcReq.on 'error', ->
+    finish resp
+
+  srcReq.end()
 
 
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
