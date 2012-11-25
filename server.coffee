@@ -3,6 +3,7 @@ Url         = require 'url'
 Http        = require 'http'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+Dns         = require 'dns';
 
 port            = parseInt process.env.PORT        || 8081
 version         = "1.0.2"
@@ -35,12 +36,8 @@ finish = (resp, str) ->
   current_connections  = 0 if current_connections < 1
   resp.connection && resp.end str
 
-process_url = (url, transferred_headers, resp, remaining_redirects) ->
-  if url.host? && !url.host.match(RESTRICTED_IPS)
-    if url.host.match(EXCLUDED_HOSTS)
-      return four_oh_four(resp, "Hitting excluded hostnames")
-
-    src = Http.createClient url.port || 80, url.hostname
+fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
+    src = Http.createClient url.port || 80, ip_address
 
     src.on 'error', (error) ->
       four_oh_four(resp, "Client Request error #{error.stack}")
@@ -116,8 +113,22 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
       finish resp
 
     srcReq.end()
-  else
-    four_oh_four(resp, "No host found " + url.host)
+
+
+process_url = (url, transferred_headers, resp, remaining_redirects) ->
+
+  if !url.host? || url.host.match(EXCLUDED_HOSTS)
+    return four_oh_four(resp, "Hitting excluded hostnames")
+
+  Dns.lookup url.host, (err, address, family) ->
+    if err
+      return four_oh_four(resp, "No host found")
+
+    if address.match(RESTRICTED_IPS)
+      return four_oh_four(resp, "Hitting excluded hostnames")
+
+    fetch_url address, url, transferred_headers, resp, remaining_redirects
+
 
 # decode a string of two char hex digits
 hexdec = (str) ->
