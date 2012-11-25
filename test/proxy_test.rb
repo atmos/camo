@@ -107,6 +107,12 @@ module CamoProxyTests
     end
   end
 
+  def test_404s_on_127_dns_hack_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://localhost.bramp.net/test.png')
+    end
+  end
+
   def test_404s_on_environmental_excludes
     assert_raise RestClient::ResourceNotFound do
       request('http://iphone.internal.example.org/foo.cgi')
