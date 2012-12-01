@@ -117,6 +117,13 @@ module CamoProxyTests
     response = request('http://d.pr/i/rr7F+')
     assert_equal(200, response.code)
   end
+
+  def test_request_from_self
+    assert_raise RestClient::ResourceNotFound do
+      uri = request_uri("#{config['host']}/favicon.ico")
+      response = request( uri )
+    end
+  end
 end
 
 class CamoProxyQueryStringTest < Test::Unit::TestCase
