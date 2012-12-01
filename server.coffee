@@ -3,6 +3,7 @@ Url         = require 'url'
 Http        = require 'http'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+Dns         = require 'dns';
 
 port            = parseInt process.env.PORT        || 8081
 version         = "1.0.3"
@@ -35,89 +36,98 @@ finish = (resp, str) ->
   current_connections  = 0 if current_connections < 1
   resp.connection && resp.end str
 
+fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
+  src = Http.createClient url.port || 80, ip_address
+
+  src.on 'error', (error) ->
+    four_oh_four(resp, "Client Request error #{error.stack}")
+
+  query_path = url.pathname
+  if url.query?
+    query_path += "?#{url.query}"
+
+  transferred_headers.host = url.host
+
+  log transferred_headers
+
+  srcReq = src.request 'GET', query_path, transferred_headers
+
+  srcReq.on 'response', (srcResp) ->
+    is_finished = true
+
+    log srcResp.headers
+
+    content_length = srcResp.headers['content-length']
+
+    if content_length > 5242880
+      four_oh_four(resp, "Content-Length exceeded")
+    else
+      newHeaders =
+        'content-type'           : srcResp.headers['content-type']
+        'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
+        'Camo-Host'              : camo_hostname
+        'X-Content-Type-Options' : 'nosniff'
+
+      # Handle chunked responses properly
+      if content_length?
+        newHeaders['content-length'] = content_length
+      if srcResp.headers['transfer-encoding']
+        newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
+      if srcResp.headers['content-encoding']
+        newHeaders['content-encoding'] = srcResp.headers['content-encoding']
+
+      srcResp.on 'end', ->
+        if is_finished
+          finish resp
+      srcResp.on 'error', ->
+        if is_finished
+          finish resp
+
+      switch srcResp.statusCode
+        when 200
+          if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
+            four_oh_four(resp, "Non-Image content-type returned")
+
+          log newHeaders
+
+          resp.writeHead srcResp.statusCode, newHeaders
+          srcResp.on 'data', (chunk) ->
+            resp.write chunk
+        when 301, 302, 303, 307
+          if remaining_redirects <= 0
+            four_oh_four(resp, "Exceeded max depth")
+          else
+            is_finished = false
+            newUrl = Url.parse srcResp.headers['location']
+            unless newUrl.host? and newUrl.hostname?
+              newUrl.host = newUrl.hostname = url.hostname
+              newUrl.protocol = url.protocol
+
+            process_url newUrl, transferred_headers, resp, remaining_redirects - 1
+        when 304
+          resp.writeHead srcResp.statusCode, newHeaders
+        else
+          four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
+  srcReq.on 'error', ->
+    finish resp
+
+  srcReq.end()
+
+
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
-  if url.host? && !url.host.match(RESTRICTED_IPS)
-    if url.host.match(EXCLUDED_HOSTS)
+
+  if !url.host? || url.host.match(EXCLUDED_HOSTS)
+    return four_oh_four(resp, "Hitting excluded hostnames")
+
+  Dns.lookup url.host, (err, address, family) ->
+    if err
+      return four_oh_four(resp, "No host found")
+
+    if address.match(RESTRICTED_IPS)
       return four_oh_four(resp, "Hitting excluded hostnames")
 
-    src = Http.createClient url.port || 80, url.hostname
+    fetch_url address, url, transferred_headers, resp, remaining_redirects
 
-    src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}")
-
-    query_path = url.pathname
-    if url.query?
-      query_path += "?#{url.query}"
-
-    transferred_headers.host = url.host
-
-    log transferred_headers
-
-    srcReq = src.request 'GET', query_path, transferred_headers
-
-    srcReq.on 'response', (srcResp) ->
-      is_finished = true
-
-      log srcResp.headers
-
-      content_length = srcResp.headers['content-length']
-
-      if content_length > 5242880
-        four_oh_four(resp, "Content-Length exceeded")
-      else
-        newHeaders =
-          'content-type'           : srcResp.headers['content-type']
-          'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
-          'Camo-Host'              : camo_hostname
-          'X-Content-Type-Options' : 'nosniff'
-
-        # Handle chunked responses properly
-        if content_length?
-          newHeaders['content-length'] = content_length
-        if srcResp.headers['transfer-encoding']
-          newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
-        if srcResp.headers['content-encoding']
-          newHeaders['content-encoding'] = srcResp.headers['content-encoding']
-
-        srcResp.on 'end', ->
-          if is_finished
-            finish resp
-        srcResp.on 'error', ->
-          if is_finished
-            finish resp
-
-        switch srcResp.statusCode
-          when 200
-            if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
-              four_oh_four(resp, "Non-Image content-type returned")
-
-            log newHeaders
-
-            resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.on 'data', (chunk) ->
-              resp.write chunk
-          when 301, 302, 303, 307
-            if remaining_redirects <= 0
-              four_oh_four(resp, "Exceeded max depth")
-            else
-              is_finished = false
-              newUrl = Url.parse srcResp.headers['location']
-              unless newUrl.host? and newUrl.hostname?
-                newUrl.host = newUrl.hostname = url.hostname
-                newUrl.protocol = url.protocol
-
-              console.log newUrl
-              process_url newUrl, transferred_headers, resp, remaining_redirects - 1
-          when 304
-            resp.writeHead srcResp.statusCode, newHeaders
-          else
-            four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
-    srcReq.on 'error', ->
-      finish resp
-
-    srcReq.end()
-  else
-    four_oh_four(resp, "No host found " + url.host)
 
 # decode a string of two char hex digits
 hexdec = (str) ->
