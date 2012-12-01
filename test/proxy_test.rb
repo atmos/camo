@@ -120,7 +120,7 @@ module CamoProxyTests
 
   def test_request_from_self
     assert_raise RestClient::ResourceNotFound do
-      uri = request_uri("#{config['host']}/favicon.ico")
+      uri = request_uri("http://camo-localhost-test.herokuapp.com")
       response = request( uri )
     end
   end
