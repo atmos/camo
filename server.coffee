@@ -160,7 +160,7 @@ server = Http.createServer (req, resp) ->
     else
       url_type = 'query'
       dest_url = QueryString.parse(url.query).url
-
+    
     log({
       type:     url_type
       url:      req.url
@@ -179,6 +179,7 @@ server = Http.createServer (req, resp) ->
       hmac_digest = hmac.digest('hex')
 
       if hmac_digest == query_digest
+        dest_url = encodeURI(decodeURI(dest_url))
         url = Url.parse dest_url
 
         process_url url, transferred_headers, resp, max_redirects
