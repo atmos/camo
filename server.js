@@ -210,6 +210,7 @@
         hmac.update(dest_url);
         hmac_digest = hmac.digest('hex');
         if (hmac_digest === query_digest) {
+          dest_url = encodeURI(decodeURI(dest_url));
           url = Url.parse(dest_url);
           return process_url(url, transferred_headers, resp, max_redirects);
         } else {
