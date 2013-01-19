@@ -163,7 +163,7 @@
   };
 
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferred_headers, url, url_type, user_agent, _base, _ref;
+    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferred_headers, url, url_type, user_agent, _base, _ref, _ref1;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -181,13 +181,13 @@
       transferred_headers = {
         'Via': user_agent,
         'User-Agent': user_agent,
-        'Accept': req.headers.accept,
+        'Accept': (_ref = req.headers.accept) != null ? _ref : 'image/*',
         'Accept-Encoding': req.headers['accept-encoding'],
         'x-forwarded-for': req.headers['x-forwarded-for'],
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
-      _ref = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref[0], encoded_url = _ref[1];
+      _ref1 = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref1[0], encoded_url = _ref1[1];
       if (encoded_url = hexdec(encoded_url)) {
         url_type = 'path';
         dest_url = encoded_url;
