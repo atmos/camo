@@ -181,7 +181,7 @@
       transferred_headers = {
         'Via': user_agent,
         'User-Agent': user_agent,
-        'Accept': (_ref = req.headers.accept) != null ? _ref : '*/*',
+        'Accept': (_ref = req.headers.accept) != null ? _ref : 'image/*',
         'Accept-Encoding': req.headers['accept-encoding'],
         'x-forwarded-for': req.headers['x-forwarded-for'],
         'x-content-type-options': 'nosniff'
