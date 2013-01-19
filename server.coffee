@@ -146,7 +146,7 @@ server = Http.createServer (req, resp) ->
     transferred_headers =
       'Via'                    : user_agent
       'User-Agent'             : user_agent
-      'Accept'                 : req.headers.accept
+      'Accept'                 : req.headers.accept ? 'image/*'
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-forwarded-for'        : req.headers['x-forwarded-for']
       'x-content-type-options' : 'nosniff'
