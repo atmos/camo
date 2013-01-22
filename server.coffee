@@ -5,7 +5,7 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "0.5.0"
+version         = "1.0.5"
 excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
@@ -146,7 +146,7 @@ server = Http.createServer (req, resp) ->
     transferred_headers =
       'Via'                    : user_agent
       'User-Agent'             : user_agent
-      'Accept'                 : req.headers.accept
+      'Accept'                 : req.headers.accept ? 'image/*'
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-forwarded-for'        : req.headers['x-forwarded-for']
       'x-content-type-options' : 'nosniff'
@@ -168,6 +168,9 @@ server = Http.createServer (req, resp) ->
       dest:     dest_url
       digest:   query_digest
     })
+
+    if req.headers['via'] && req.headers['via'].indexOf(user_agent) != -1
+      return four_oh_four(resp, "Requesting from self")
 
     if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
