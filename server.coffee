@@ -94,8 +94,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             log newHeaders
 
             resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.on 'data', (chunk) ->
-              resp.write chunk
+            srcResp.pipe resp
           when 301, 302, 303, 307
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
