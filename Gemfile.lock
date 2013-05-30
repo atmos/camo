@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.3.4)
+    mime-types (1.23)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  addressable (~> 2.3)
+  rest-client (~> 1.3)
