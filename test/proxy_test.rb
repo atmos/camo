@@ -4,7 +4,6 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
-require 'ruby-debug'
 
 require 'test/unit'
 

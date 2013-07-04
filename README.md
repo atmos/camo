@@ -43,14 +43,14 @@ that the resulting value includes only characters `[0-9a-f]`.
     % coffee server.coffee
 
 ### In another shell
-
-    % rake
+    % bundle install # first time only
+    % bundle exec rake
 
 ### Debugging
 
-To see the full URL resclient is hitting etc, try this.
+To see the full URL restclient is hitting etc, try this.
 
-    % RESTCLIENT_LOG=stdout rake
+    % RESTCLIENT_LOG=stdout bundle exec rake
 
 ### Deployment
 
