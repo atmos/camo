@@ -115,9 +115,7 @@
               }
               log(newHeaders);
               resp.writeHead(srcResp.statusCode, newHeaders);
-              return srcResp.on('data', function(chunk) {
-                return resp.write(chunk);
-              });
+              return srcResp.pipe(resp);
             case 301:
             case 302:
             case 303:
