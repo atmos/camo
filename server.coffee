@@ -98,6 +98,8 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
           when 301, 302, 303, 307
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth")
+            else if !srcResp.headers['location']
+              four_oh_four(resp, "Redirect with no location")
             else
               is_finished = false
               newUrl = Url.parse srcResp.headers['location']
