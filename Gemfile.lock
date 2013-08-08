@@ -2,9 +2,16 @@ GEM
   remote: https://rubygems.org/
   specs:
     addressable (2.3.4)
+    daemons (1.1.9)
+    eventmachine (1.0.3)
     mime-types (1.23)
+    rack (1.5.2)
     rest-client (1.6.7)
       mime-types (>= 1.16)
+    thin (1.5.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
 
 PLATFORMS
   ruby
@@ -12,3 +19,4 @@ PLATFORMS
 DEPENDENCIES
   addressable (~> 2.3)
   rest-client (~> 1.3)
+  thin

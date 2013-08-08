@@ -4,12 +4,22 @@ end
 task :build => 'server.js'
 
 namespace :test do
+  desc "Start test server"
+  task :server do |t|
+    $SERVER_PID = Process.spawn("ruby test/proxy_test_server.rb")
+  end
+
   desc "Run the tests against localhost"
   task :check do |t|
     system("ruby test/proxy_test.rb")
   end
+
+  desc "Kill test server"
+  task :kill_server do |t|
+    Process.kill(:QUIT, $SERVER_PID) && Process.wait
+  end
 end
-task :default => [:build, "test:check"]
+task :default => [:build, "test:server", "test:check", "test:kill_server"]
 
 Dir["tasks/*.rake"].each do |f|
   load f
