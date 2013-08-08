@@ -3,6 +3,10 @@ file 'server.js' => 'server.coffee' do
 end
 task :build => 'server.js'
 
+task :bundle do
+  system("bundle install --gemfile test.gemfile")
+end
+
 namespace :test do
   desc "Start test server"
   task :server do |t|
@@ -11,7 +15,12 @@ namespace :test do
 
   desc "Run the tests against localhost"
   task :check do |t|
-    system("ruby test/proxy_test.rb")
+    system("BUNDLE_GEMFILE=test.gemfile bundle exec ruby test/proxy_test.rb")
+  end
+
+  desc "Kill test server"
+  task :kill_server do |t|
+    Process.kill(:QUIT, $SERVER_PID) && Process.wait
   end
 
   desc "Kill test server"
@@ -19,7 +28,8 @@ namespace :test do
     Process.kill(:QUIT, $SERVER_PID) && Process.wait
   end
 end
-task :default => [:build, "test:server", "test:check", "test:kill_server"]
+
+task :default => [:build, :bundle, "test:server", "test:check", "test:kill_server"]
 
 Dir["tasks/*.rake"].each do |f|
   load f

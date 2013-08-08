@@ -8,7 +8,7 @@ We want to allow people to keep embedding images in comments/issues/READMEs/goog
 
 Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
-Camo currently runs on node version 0.4.10 at GitHub.
+Camo currently runs on node version 0.10.13 at GitHub on [heroku](http://heroku.com).
 
 Features
 --------
@@ -43,14 +43,14 @@ that the resulting value includes only characters `[0-9a-f]`.
     % coffee server.coffee
 
 ### In another shell
-    % bundle install # first time only
-    % bundle exec rake
+
+    % rake
 
 ### Debugging
 
 To see the full URL restclient is hitting etc, try this.
 
-    % RESTCLIENT_LOG=stdout bundle exec rake
+    % RESTCLIENT_LOG=stdout rake
 
 ### Deployment
 
