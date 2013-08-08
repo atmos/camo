@@ -18,8 +18,6 @@ module CamoProxyTests
     assert_raise RestClient::ResourceNotFound do
       request('http://localhost:9292')
     end
-    response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
-    assert_equal(200, response.code)  
   end 
 
   def test_proxy_valid_image_url
