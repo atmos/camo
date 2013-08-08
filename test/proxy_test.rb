@@ -4,6 +4,7 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
+require 'thin'
 
 require 'test/unit'
 
@@ -12,6 +13,14 @@ module CamoProxyTests
     { 'key'  => ENV['CAMO_KEY']  || "0x24FEEDFACEDEADBEEFCAFE",
       'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
   end
+
+  def test_proxy_survives_redirect_without_location
+    assert_raise RestClient::ResourceNotFound do
+      request('http://localhost:9292')
+    end
+    response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
+    assert_equal(200, response.code)  
+  end 
 
   def test_proxy_valid_image_url
     response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
