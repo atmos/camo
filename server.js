@@ -225,10 +225,6 @@
 
   console.log("Using the secret key " + shared_key);
 
-  Fs.open("tmp/camo.pid", "w", 0x180, function(err, fd) {
-    return Fs.writeSync(fd, process.pid);
-  });
-
   server.listen(port);
 
 }).call(this);
