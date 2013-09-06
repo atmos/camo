@@ -5,7 +5,7 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "1.0.5"
+version         = "1.1.2"
 excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
@@ -190,8 +190,5 @@ server = Http.createServer (req, resp) ->
 
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
 console.log "Using the secret key #{shared_key}"
-
-Fs.open "tmp/camo.pid", "w", 0o600, (err, fd) ->
-  Fs.writeSync fd, process.pid
 
 server.listen port
