@@ -207,7 +207,7 @@
       }
       if ((url.pathname != null) && dest_url) {
         hmac = Crypto.createHmac("sha1", shared_key);
-        hmac.update(dest_url);
+        hmac.update(dest_url, 'utf8');
         hmac_digest = hmac.digest('hex');
         if (hmac_digest === query_digest) {
           url = Url.parse(dest_url);
