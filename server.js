@@ -14,7 +14,7 @@
 
   port = parseInt(process.env.PORT || 8081);
 
-  version = "1.1.2";
+  version = "1.1.3";
 
   excluded = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org';
 
