@@ -1,3 +1,8 @@
+1.1.3
+=====
+
+* [Address ddos](https://groups.google.com/forum/#!msg/nodejs/NEbweYB0ei0/gWvyzCunYjsJ?mkt_tok=3RkMMJWWfF9wsRonuavPZKXonjHpfsX54%2B8tXaO3lMI%2F0ER3fOvrPUfGjI4ASMFrI%2BSLDwEYGJlv6SgFQrjAMapmyLgLUhE%3D) in earlier versions of node.
+
 1.1.1
 =====
 
