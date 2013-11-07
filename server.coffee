@@ -38,6 +38,15 @@ finish = (resp, str) ->
 
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
   if url.host?
+    if url.protocol == 'https:'
+      error_log("Redirecting https URL to origin: #{url.format()}")
+      resp.writeHead 302, {'Location': url.format()}
+      finish resp
+      return
+    else if url.protocol != 'http:'
+      four_oh_four(resp, "Unknown protocol", url)
+      return
+
     src = Http.createClient url.port || 80, url.hostname
 
     src.on 'error', (error) ->
