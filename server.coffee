@@ -12,18 +12,22 @@ camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 connect_timeout = process.env.CAMO_CONNECT_TIMEOUT || 10
 
-log = (msg) ->
-  unless logging_enabled == "disabled"
+debug_log = (msg) ->
+  if logging_enabled == "debug"
     console.log("--------------------------------------------")
     console.log(msg)
     console.log("--------------------------------------------")
+
+error_log = (msg) ->
+  unless logging_enabled == "disabled"
+    console.error("[#{new Date().toISOString()}] #{msg}")
 
 total_connections   = 0
 current_connections = 0
 started_at          = new Date
 
-four_oh_four = (resp, msg) ->
-  log msg
+four_oh_four = (resp, msg, url) ->
+  error_log "#{msg}: #{url?.format() or 'unknown'}"
   resp.writeHead 404
   finish resp, "Not Found"
 
@@ -37,7 +41,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     src = Http.createClient url.port || 80, url.hostname
 
     src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}")
+      four_oh_four(resp, "Client Request error #{error.stack}", url)
 
     query_path = url.pathname
     if url.query?
@@ -45,7 +49,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
 
     transferred_headers.host = url.host
 
-    log transferred_headers
+    debug_log transferred_headers
 
     srcReq = src.request 'GET', query_path, transferred_headers
 
@@ -56,12 +60,12 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     srcReq.on 'response', (srcResp) ->
       is_finished = true
 
-      log srcResp.headers
+      debug_log srcResp.headers
 
       content_length = srcResp.headers['content-length']
 
       if content_length > 5242880
-        four_oh_four(resp, "Content-Length exceeded")
+        four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
           'content-type'           : srcResp.headers['content-type']
@@ -87,17 +91,17 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         switch srcResp.statusCode
           when 200
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
-              four_oh_four(resp, "Non-Image content-type returned")
+              four_oh_four(resp, "Non-Image content-type returned", url)
 
-            log newHeaders
+            debug_log newHeaders
 
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.pipe resp
           when 301, 302, 303, 307
             if remaining_redirects <= 0
-              four_oh_four(resp, "Exceeded max depth")
+              four_oh_four(resp, "Exceeded max depth", url)
             else if !srcResp.headers['location']
-              four_oh_four(resp, "Redirect with no location")
+              four_oh_four(resp, "Redirect with no location", url)
             else
               is_finished = false
               newUrl = Url.parse srcResp.headers['location']
@@ -105,18 +109,18 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
                 newUrl.host = newUrl.hostname = url.hostname
                 newUrl.protocol = url.protocol
 
-              console.log newUrl
+              debug_log "Redirected to #{newUrl.format()}"
               process_url newUrl, transferred_headers, resp, remaining_redirects - 1
           when 304
             resp.writeHead srcResp.statusCode, newHeaders
           else
-            four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
+            four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
     srcReq.on 'error', ->
       finish resp
 
     srcReq.end()
   else
-    four_oh_four(resp, "No host found " + url.host)
+    four_oh_four(resp, "No host found " + url.host, url)
 
 # decode a string of two char hex digits
 hexdec = (str) ->
@@ -160,7 +164,7 @@ server = Http.createServer (req, resp) ->
       url_type = 'query'
       dest_url = QueryString.parse(url.query).url
 
-    log({
+    debug_log({
       type:     url_type
       url:      req.url
       headers:  req.headers
