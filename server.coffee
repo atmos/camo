@@ -11,6 +11,7 @@ max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 connect_timeout = process.env.CAMO_CONNECT_TIMEOUT || 10
+content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
 debug_log = (msg) ->
   if logging_enabled == "debug"
@@ -73,7 +74,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
 
       content_length = srcResp.headers['content-length']
 
-      if content_length > 5242880
+      if content_length > content_length_limit
         srcResp.destroy()
         four_oh_four(resp, "Content-Length exceeded", url)
       else
