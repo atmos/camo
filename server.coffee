@@ -6,7 +6,6 @@ QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
 version         = "1.1.3"
-excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
@@ -18,9 +17,6 @@ log = (msg) ->
     console.log("--------------------------------------------")
     console.log(msg)
     console.log("--------------------------------------------")
-
-EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"))
-RESTRICTED_IPS = /^((10\.)|(127\.)|(169\.254)|(192\.168)|(172\.((1[6-9])|(2[0-9])|(3[0-1]))))/
 
 total_connections   = 0
 current_connections = 0
@@ -37,10 +33,7 @@ finish = (resp, str) ->
   resp.connection && resp.end str
 
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
-  if url.host? && !url.host.match(RESTRICTED_IPS)
-    if url.host.match(EXCLUDED_HOSTS)
-      return four_oh_four(resp, "Hitting excluded hostnames")
-
+  if url.host?
     src = Http.createClient url.port || 80, url.hostname
 
     src.on 'error', (error) ->
