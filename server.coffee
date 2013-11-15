@@ -5,21 +5,18 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "1.1.3"
-excluded        = process.env.CAMO_HOST_EXCLUSIONS || '*.example.org'
+version         = "1.2.0"
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
+connect_timeout = process.env.CAMO_CONNECT_TIMEOUT || 10
 
 log = (msg) ->
   unless logging_enabled == "disabled"
     console.log("--------------------------------------------")
     console.log(msg)
     console.log("--------------------------------------------")
-
-EXCLUDED_HOSTS = new RegExp(excluded.replace(".", "\\.").replace("*", "\\.*"))
-RESTRICTED_IPS = /^((10\.)|(127\.)|(169\.254)|(192\.168)|(172\.((1[6-9])|(2[0-9])|(3[0-1]))))/
 
 total_connections   = 0
 current_connections = 0
@@ -36,10 +33,7 @@ finish = (resp, str) ->
   resp.connection && resp.end str
 
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
-  if url.host? && !url.host.match(RESTRICTED_IPS)
-    if url.host.match(EXCLUDED_HOSTS)
-      return four_oh_four(resp, "Hitting excluded hostnames")
-
+  if url.host?
     src = Http.createClient url.port || 80, url.hostname
 
     src.on 'error', (error) ->
@@ -54,6 +48,10 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     log transferred_headers
 
     srcReq = src.request 'GET', query_path, transferred_headers
+
+    srcReq.setTimeout (connect_timeout * 1000), ()->
+      srcReq.end()
+      four_oh_four resp, "Timeout connecting to #{url.host}"
 
     srcReq.on 'response', (srcResp) ->
       is_finished = true
@@ -175,7 +173,7 @@ server = Http.createServer (req, resp) ->
 
     if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url)
+      hmac.update(dest_url, 'utf8')
 
       hmac_digest = hmac.digest('hex')
 
