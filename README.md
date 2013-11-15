@@ -38,6 +38,10 @@ that the resulting value includes only characters `[0-9a-f]`.
 
 ## Testing Functionality
 
+### Bundle Everything
+
+    % rake bundle
+
 ### Start the server
 
     % coffee server.coffee
