@@ -74,6 +74,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
       content_length = srcResp.headers['content-length']
 
       if content_length > 5242880
+        srcResp.destroy()
         four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
@@ -100,13 +101,16 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         switch srcResp.statusCode
           when 200
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
+              srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
+              return
 
             debug_log newHeaders
 
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.pipe resp
           when 301, 302, 303, 307
+            srcResp.destroy()
             if remaining_redirects <= 0
               four_oh_four(resp, "Exceeded max depth", url)
             else if !srcResp.headers['location']
@@ -121,8 +125,10 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
               debug_log "Redirected to #{newUrl.format()}"
               process_url newUrl, transferred_headers, resp, remaining_redirects - 1
           when 304
+            srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
           else
+            srcResp.destroy()
             four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
     srcReq.on 'error', ->
       finish resp
