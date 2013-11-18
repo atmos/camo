@@ -37,6 +37,30 @@ finish = (resp, str) ->
   current_connections  = 0 if current_connections < 1
   resp.connection && resp.end str
 
+# A Transform Stream that limits the piped data to the specified length
+Stream = require('stream')
+class LimitStream extends Stream.Transform
+  constructor: (length) ->
+    super()
+    @remaining = length
+
+  _transform: (chunk, encoding, cb) ->
+    if @remaining > 0
+      if @remaining < chunk.length
+        chunk = chunk.slice(0, @remaining)
+      @push(chunk)
+      @remaining -= chunk.length
+      if @remaining <= 0
+        @emit('length_limited')
+        @end()
+    cb()
+
+  write: (chunk, encoding, cb) ->
+    if @remaining > 0
+      super
+    else
+      false
+
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
   if url.host?
     if url.protocol == 'https:'
@@ -109,7 +133,15 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             debug_log newHeaders
 
             resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.pipe resp
+
+            limit = new LimitStream(content_length_limit)
+            srcResp.pipe(limit)
+            limit.pipe(resp)
+
+            limit.on 'length_limited', ->
+              srcResp.destroy()
+              error_log("Killed connection at content_length_limit: #{url.format()}")
+
           when 301, 302, 303, 307
             srcResp.destroy()
             if remaining_redirects <= 0
