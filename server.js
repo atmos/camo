@@ -22,9 +22,9 @@
 
   camo_hostname = process.env.CAMO_HOSTNAME || "unknown";
 
-  logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled";
-
   socket_timeout = process.env.CAMO_SOCKET_TIMEOUT || 10;
+
+  logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled";
 
   content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10);
 
