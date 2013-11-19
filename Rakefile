@@ -22,6 +22,11 @@ namespace :test do
   task :kill_server do |t|
     Process.kill(:QUIT, $SERVER_PID) && Process.wait
   end
+
+  desc "Kill test server"
+  task :kill_server do |t|
+    Process.kill(:QUIT, $SERVER_PID) && Process.wait
+  end
 end
 
 task :default => [:build, :bundle, "test:server", "test:check", "test:kill_server"]
