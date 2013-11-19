@@ -5,25 +5,30 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "1.2.0"
+version         = "1.2.1"
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
+socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-connect_timeout = process.env.CAMO_CONNECT_TIMEOUT || 10
+content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
-log = (msg) ->
-  unless logging_enabled == "disabled"
+debug_log = (msg) ->
+  if logging_enabled == "debug"
     console.log("--------------------------------------------")
     console.log(msg)
     console.log("--------------------------------------------")
+
+error_log = (msg) ->
+  unless logging_enabled == "disabled"
+    console.error("[#{new Date().toISOString()}] #{msg}")
 
 total_connections   = 0
 current_connections = 0
 started_at          = new Date
 
-four_oh_four = (resp, msg) ->
-  log msg
+four_oh_four = (resp, msg, url) ->
+  error_log "#{msg}: #{url?.format() or 'unknown'}"
   resp.writeHead 404
   finish resp, "Not Found"
 
@@ -34,10 +39,19 @@ finish = (resp, str) ->
 
 process_url = (url, transferred_headers, resp, remaining_redirects) ->
   if url.host?
+    if url.protocol == 'https:'
+      error_log("Redirecting https URL to origin: #{url.format()}")
+      resp.writeHead 302, {'Location': url.format()}
+      finish resp
+      return
+    else if url.protocol != 'http:'
+      four_oh_four(resp, "Unknown protocol", url)
+      return
+
     src = Http.createClient url.port || 80, url.hostname
 
     src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}")
+      four_oh_four(resp, "Client Request error #{error.stack}", url)
 
     query_path = url.pathname
     if url.query?
@@ -45,23 +59,24 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
 
     transferred_headers.host = url.host
 
-    log transferred_headers
+    debug_log transferred_headers
 
     srcReq = src.request 'GET', query_path, transferred_headers
 
-    srcReq.setTimeout (connect_timeout * 1000), ()->
-      srcReq.end()
-      four_oh_four resp, "Timeout connecting to #{url.host}"
+    srcReq.setTimeout (socket_timeout * 1000), ()->
+      srcReq.abort()
+      four_oh_four resp, "Socket timeout", url
 
     srcReq.on 'response', (srcResp) ->
       is_finished = true
 
-      log srcResp.headers
+      debug_log srcResp.headers
 
       content_length = srcResp.headers['content-length']
 
-      if content_length > 5242880
-        four_oh_four(resp, "Content-Length exceeded")
+      if content_length > content_length_limit
+        srcResp.destroy()
+        four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
           'content-type'           : srcResp.headers['content-type']
@@ -87,17 +102,20 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
         switch srcResp.statusCode
           when 200
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
-              four_oh_four(resp, "Non-Image content-type returned")
+              srcResp.destroy()
+              four_oh_four(resp, "Non-Image content-type returned", url)
+              return
 
-            log newHeaders
+            debug_log newHeaders
 
             resp.writeHead srcResp.statusCode, newHeaders
             srcResp.pipe resp
           when 301, 302, 303, 307
+            srcResp.destroy()
             if remaining_redirects <= 0
-              four_oh_four(resp, "Exceeded max depth")
+              four_oh_four(resp, "Exceeded max depth", url)
             else if !srcResp.headers['location']
-              four_oh_four(resp, "Redirect with no location")
+              four_oh_four(resp, "Redirect with no location", url)
             else
               is_finished = false
               newUrl = Url.parse srcResp.headers['location']
@@ -105,18 +123,29 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
                 newUrl.host = newUrl.hostname = url.hostname
                 newUrl.protocol = url.protocol
 
-              console.log newUrl
+              debug_log "Redirected to #{newUrl.format()}"
               process_url newUrl, transferred_headers, resp, remaining_redirects - 1
           when 304
+            srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
           else
-            four_oh_four(resp, "Responded with " + srcResp.statusCode + ":" + srcResp.headers)
+            srcResp.destroy()
+            four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
+
     srcReq.on 'error', ->
       finish resp
 
     srcReq.end()
+
+    resp.on 'close', ->
+      error_log("Request aborted")
+      srcReq.abort()
+
+    resp.on 'error', (e) ->
+      error_log("Request error: #{e}")
+      srcReq.abort()
   else
-    four_oh_four(resp, "No host found " + url.host)
+    four_oh_four(resp, "No host found " + url.host, url)
 
 # decode a string of two char hex digits
 hexdec = (str) ->
@@ -160,7 +189,7 @@ server = Http.createServer (req, resp) ->
       url_type = 'query'
       dest_url = QueryString.parse(url.query).url
 
-    log({
+    debug_log({
       type:     url_type
       url:      req.url
       headers:  req.headers
