@@ -22,6 +22,11 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_follows_https_redirect_for_image_links
+    response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
+    assert_equal(200, response.code)
+  end
+
   def test_proxy_valid_image_url
     response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
     assert_equal(200, response.code)
