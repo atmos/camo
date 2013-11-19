@@ -131,10 +131,19 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
           else
             srcResp.destroy()
             four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
+
     srcReq.on 'error', ->
       finish resp
 
     srcReq.end()
+
+    resp.on 'close', ->
+      error_log("Request aborted")
+      srcReq.abort()
+
+    resp.on 'error', (e) ->
+      error_log("Request error: #{e}")
+      srcReq.abort()
   else
     four_oh_four(resp, "No host found " + url.host, url)
 
