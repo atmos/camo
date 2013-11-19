@@ -10,7 +10,7 @@ shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-connect_timeout = process.env.CAMO_CONNECT_TIMEOUT || 10
+socket_timeout = process.env.CAMO_SOCKET_TIMEOUT || 10
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
 debug_log = (msg) ->
@@ -63,9 +63,9 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
 
     srcReq = src.request 'GET', query_path, transferred_headers
 
-    srcReq.setTimeout (connect_timeout * 1000), ()->
-      srcReq.end()
-      four_oh_four resp, "Timeout connecting to #{url.host}"
+    srcReq.setTimeout (socket_timeout * 1000), ()->
+      srcReq.abort()
+      four_oh_four resp, "Socket timeout", url
 
     srcReq.on 'response', (srcResp) ->
       is_finished = true
