@@ -67,7 +67,7 @@
     if (url.host != null) {
       if (url.protocol === 'https:') {
         error_log("Redirecting https URL to origin: " + (url.format()));
-        resp.writeHead(302, {
+        resp.writeHead(301, {
           'Location': url.format()
         });
         finish(resp);

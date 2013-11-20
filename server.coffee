@@ -41,7 +41,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
   if url.host?
     if url.protocol == 'https:'
       error_log("Redirecting https URL to origin: #{url.format()}")
-      resp.writeHead 302, {'Location': url.format()}
+      resp.writeHead 301, {'Location': url.format()}
       finish resp
       return
     else if url.protocol != 'http:'
