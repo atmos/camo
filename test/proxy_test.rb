@@ -94,9 +94,29 @@ module CamoProxyTests
     end
   end
 
-  def test_404s_on_connect_timeout
+  def test_404s_on_10_0_ip_range
     assert_raise RestClient::ResourceNotFound do
       request('http://10.0.0.1/foo.cgi')
+    end
+  end
+
+  16.upto(31) do |i|
+    define_method :"test_404s_on_172_#{i}_ip_range" do
+      assert_raise RestClient::ResourceNotFound do
+        request("http://172.#{i}.0.1/foo.cgi")
+      end
+    end
+  end
+
+  def test_404s_on_169_254_ip_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://169.254.0.1/foo.cgi')
+    end
+  end
+
+  def test_404s_on_192_168_ip_range
+    assert_raise RestClient::ResourceNotFound do
+      request('http://192.168.0.1/foo.cgi')
     end
   end
 
