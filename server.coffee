@@ -221,7 +221,6 @@ server = Http.createServer (req, resp) ->
       'User-Agent'             : user_agent
       'Accept'                 : req.headers.accept ? 'image/*'
       'Accept-Encoding'        : req.headers['accept-encoding']
-      'x-forwarded-for'        : req.headers['x-forwarded-for']
       'x-content-type-options' : 'nosniff'
 
     delete(req.headers.cookie)
