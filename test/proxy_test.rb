@@ -78,6 +78,16 @@ module CamoProxyTests
     assert_nil(response.headers[:content_length])
   end
 
+  def test_proxy_https_octocat
+    response = request('https://octodex.github.com/images/original.png')
+    assert_equal(200, response.code)
+  end
+
+  def test_proxy_https_gravatar
+    response = request('https://1.gravatar.com/avatar/a86224d72ce21cd9f5bee6784d4b06c7')
+    assert_equal(200, response.code)
+  end
+
   def test_follows_redirects
     response = request('http://cl.ly/1K0X2Y2F1P0o3z140p0d/boom-headshot.gif')
     assert_equal(200, response.code)
