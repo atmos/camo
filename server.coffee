@@ -64,7 +64,7 @@ class LimitStream extends Stream.Transform
     else
       false
 
-process_url = (url, transferred_headers, resp, remaining_redirects) ->
+process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if !url.host?
     return four_oh_four(resp, "Invalid host", url)
 
@@ -84,21 +84,21 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     if address.match(RESTRICTED_IPS)
       return four_oh_four(resp, "Hitting excluded IP", url)
 
-    fetch_url address, url, transferred_headers, resp, remaining_redirects
+    fetch_url address, url, transferredHeaders, resp, remaining_redirects
 
-  fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
+  fetch_url = (ip_address, url, transferredHeaders, resp, remaining_redirects) ->
     queryPath = url.pathname
     if url.query?
       queryPath += "?#{url.query}"
 
-    transferred_headers.host = url.host
-    debug_log transferred_headers
+    transferredHeaders.host = url.host
+    debug_log transferredHeaders
 
     requestOptions =
       hostname: url.hostname
       port: url.port ? 80
       path: queryPath
-      headers: transferred_headers
+      headers: transferredHeaders
 
     srcReq = Http.get requestOptions, (srcResp) ->
       is_finished = true
@@ -165,7 +165,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
                 newUrl.protocol = url.protocol
 
               debug_log "Redirected to #{newUrl.format()}"
-              process_url newUrl, transferred_headers, resp, remaining_redirects - 1
+              process_url newUrl, transferredHeaders, resp, remaining_redirects - 1
           when 304
             srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
@@ -212,7 +212,7 @@ server = Http.createServer (req, resp) ->
     url = Url.parse req.url
     user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
-    transferred_headers =
+    transferredHeaders =
       'Via'                    : user_agent
       'User-Agent'             : user_agent
       'Accept'                 : req.headers.accept ? 'image/*'
@@ -249,7 +249,7 @@ server = Http.createServer (req, resp) ->
       if hmac_digest == query_digest
         url = Url.parse dest_url
 
-        process_url url, transferred_headers, resp, max_redirects
+        process_url url, transferredHeaders, resp, max_redirects
       else
         four_oh_four(resp, "checksum mismatch #{hmac_digest}:#{query_digest}")
     else
