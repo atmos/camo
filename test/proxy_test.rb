@@ -4,7 +4,6 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
-require 'thin'
 
 require 'test/unit'
 
@@ -15,7 +14,9 @@ module CamoProxyTests
   end
 
   def spawn_server(path)
-    pid = Process.spawn("ruby test/servers/#{path}.rb", :out => "/dev/null")
+    port = 9292
+    config = "test/servers/#{path}.ru"
+    pid = Process.spawn("rackup --port #{port} #{config}", [:out, :err] => "/dev/null")
     begin
       yield
     ensure
