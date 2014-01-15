@@ -105,7 +105,7 @@
 
   })(Stream.Transform);
 
-  process_url = function(url, transferred_headers, resp, remaining_redirects) {
+  process_url = function(url, transferredHeaders, resp, remaining_redirects) {
     var fetch_url;
     if (url.host == null) {
       return four_oh_four(resp, "Invalid host", url);
@@ -128,21 +128,21 @@
       if (address.match(RESTRICTED_IPS)) {
         return four_oh_four(resp, "Hitting excluded IP", url);
       }
-      return fetch_url(address, url, transferred_headers, resp, remaining_redirects);
+      return fetch_url(address, url, transferredHeaders, resp, remaining_redirects);
     });
-    return fetch_url = function(ip_address, url, transferred_headers, resp, remaining_redirects) {
+    return fetch_url = function(ip_address, url, transferredHeaders, resp, remaining_redirects) {
       var queryPath, requestOptions, srcReq, _ref;
       queryPath = url.pathname;
       if (url.query != null) {
         queryPath += "?" + url.query;
       }
-      transferred_headers.host = url.host;
-      debug_log(transferred_headers);
+      transferredHeaders.host = url.host;
+      debug_log(transferredHeaders);
       requestOptions = {
         hostname: url.hostname,
         port: (_ref = url.port) != null ? _ref : 80,
         path: queryPath,
-        headers: transferred_headers
+        headers: transferredHeaders
       };
       srcReq = Http.get(requestOptions, function(srcResp) {
         var content_length, is_finished, limit, newHeaders, newUrl;
@@ -211,7 +211,7 @@
                   newUrl.protocol = url.protocol;
                 }
                 debug_log("Redirected to " + (newUrl.format()));
-                return process_url(newUrl, transferred_headers, resp, remaining_redirects - 1);
+                return process_url(newUrl, transferredHeaders, resp, remaining_redirects - 1);
               }
               break;
             case 304:
@@ -253,7 +253,7 @@
   };
 
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferred_headers, url, url_type, user_agent, _base, _ref, _ref1;
+    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferredHeaders, url, url_type, user_agent, _base, _ref, _ref1;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -268,7 +268,7 @@
       current_connections += 1;
       url = Url.parse(req.url);
       user_agent = (_base = process.env).CAMO_HEADER_VIA || (_base.CAMO_HEADER_VIA = "Camo Asset Proxy " + version);
-      transferred_headers = {
+      transferredHeaders = {
         'Via': user_agent,
         'User-Agent': user_agent,
         'Accept': (_ref = req.headers.accept) != null ? _ref : 'image/*',
@@ -300,7 +300,7 @@
         hmac_digest = hmac.digest('hex');
         if (hmac_digest === query_digest) {
           url = Url.parse(dest_url);
-          return process_url(url, transferred_headers, resp, max_redirects);
+          return process_url(url, transferredHeaders, resp, max_redirects);
         } else {
           return four_oh_four(resp, "checksum mismatch " + hmac_digest + ":" + query_digest);
         }
