@@ -26,6 +26,13 @@ module CamoProxyTests
     end
   end
 
+  def test_proxy_localhost_test_server
+    spawn_server(:ok) do |host|
+      response = request("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
+    end
+  end
+
   def test_proxy_survives_redirect_without_location
     spawn_server(:redirect_without_location) do |host|
       assert_raise RestClient::ResourceNotFound do
