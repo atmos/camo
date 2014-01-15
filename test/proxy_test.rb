@@ -16,9 +16,10 @@ module CamoProxyTests
   def spawn_server(path)
     port = 9292
     config = "test/servers/#{path}.ru"
+    host = "localhost:#{port}"
     pid = Process.spawn("rackup --port #{port} #{config}", [:out, :err] => "/dev/null")
     begin
-      yield
+      yield host
     ensure
       Process.kill(:TERM, pid)
       Process.wait(pid)
@@ -26,13 +27,14 @@ module CamoProxyTests
   end
 
   def test_proxy_survives_redirect_without_location
-    spawn_server(:redirect_without_location) do
+    spawn_server(:redirect_without_location) do |host|
       assert_raise RestClient::ResourceNotFound do
-        request('http://localhost:9292')
+        request("http://#{host}")
       end
-      response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
-      assert_equal(200, response.code)
     end
+
+    response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
+    assert_equal(200, response.code)
   end
 
   def test_follows_https_redirect_for_image_links
