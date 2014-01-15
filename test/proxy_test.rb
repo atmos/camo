@@ -14,12 +14,24 @@ module CamoProxyTests
       'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
   end
 
-  def test_proxy_survives_redirect_without_location
-    assert_raise RestClient::ResourceNotFound do
-      request('http://localhost:9292')
+  def spawn_server(path)
+    pid = Process.spawn("ruby #{path}", :out => "/dev/null")
+    begin
+      yield
+    ensure
+      Process.kill(:TERM, pid)
+      Process.wait(pid)
     end
-    response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
-    assert_equal(200, response.code)
+  end
+
+  def test_proxy_survives_redirect_without_location
+    spawn_server("test/proxy_test_server.rb") do
+      assert_raise RestClient::ResourceNotFound do
+        request('http://localhost:9292')
+      end
+      response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
+      assert_equal(200, response.code)
+    end
   end
 
   def test_follows_https_redirect_for_image_links
