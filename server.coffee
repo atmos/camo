@@ -173,7 +173,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             srcResp.destroy()
             four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
 
-    srcReq.setTimeout (socket_timeout * 1000), ()->
+    srcReq.setTimeout (socket_timeout * 1000), ->
       srcReq.abort()
       four_oh_four resp, "Socket timeout", url
 
