@@ -87,26 +87,20 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
     fetch_url address, url, transferred_headers, resp, remaining_redirects
 
   fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
-    src = Http.createClient url.port || 80, url.hostname
-
-    src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}", url)
-
-    query_path = url.pathname
+    queryPath = url.pathname
     if url.query?
-      query_path += "?#{url.query}"
+      queryPath += "?#{url.query}"
 
     transferred_headers.host = url.host
-
     debug_log transferred_headers
 
-    srcReq = src.request 'GET', query_path, transferred_headers
+    requestOptions =
+      hostname: url.hostname
+      port: url.port ? 80
+      path: queryPath
+      headers: transferred_headers
 
-    srcReq.setTimeout (socket_timeout * 1000), ()->
-      srcReq.abort()
-      four_oh_four resp, "Socket timeout", url
-
-    srcReq.on 'response', (srcResp) ->
+    srcReq = Http.get requestOptions, (srcResp) ->
       is_finished = true
 
       debug_log srcResp.headers
@@ -179,10 +173,12 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             srcResp.destroy()
             four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
 
+    srcReq.setTimeout (socket_timeout * 1000), ()->
+      srcReq.abort()
+      four_oh_four resp, "Socket timeout", url
+
     srcReq.on 'error', ->
       finish resp
-
-    srcReq.end()
 
     resp.on 'close', ->
       error_log("Request aborted")

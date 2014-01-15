@@ -131,23 +131,20 @@
       return fetch_url(address, url, transferred_headers, resp, remaining_redirects);
     });
     return fetch_url = function(ip_address, url, transferred_headers, resp, remaining_redirects) {
-      var query_path, src, srcReq;
-      src = Http.createClient(url.port || 80, url.hostname);
-      src.on('error', function(error) {
-        return four_oh_four(resp, "Client Request error " + error.stack, url);
-      });
-      query_path = url.pathname;
+      var queryPath, requestOptions, srcReq, _ref;
+      queryPath = url.pathname;
       if (url.query != null) {
-        query_path += "?" + url.query;
+        queryPath += "?" + url.query;
       }
       transferred_headers.host = url.host;
       debug_log(transferred_headers);
-      srcReq = src.request('GET', query_path, transferred_headers);
-      srcReq.setTimeout(socket_timeout * 1000, function() {
-        srcReq.abort();
-        return four_oh_four(resp, "Socket timeout", url);
-      });
-      srcReq.on('response', function(srcResp) {
+      requestOptions = {
+        hostname: url.hostname,
+        port: (_ref = url.port) != null ? _ref : 80,
+        path: queryPath,
+        headers: transferred_headers
+      };
+      srcReq = Http.get(requestOptions, function(srcResp) {
         var content_length, is_finished, limit, newHeaders, newUrl;
         is_finished = true;
         debug_log(srcResp.headers);
@@ -226,10 +223,13 @@
           }
         }
       });
+      srcReq.setTimeout(socket_timeout * 1000, function() {
+        srcReq.abort();
+        return four_oh_four(resp, "Socket timeout", url);
+      });
       srcReq.on('error', function() {
         return finish(resp);
       });
-      srcReq.end();
       resp.on('close', function() {
         error_log("Request aborted");
         return srcReq.abort();
@@ -273,7 +273,6 @@
         'User-Agent': user_agent,
         'Accept': (_ref = req.headers.accept) != null ? _ref : 'image/*',
         'Accept-Encoding': req.headers['accept-encoding'],
-        'x-forwarded-for': req.headers['x-forwarded-for'],
         'x-content-type-options': 'nosniff'
       };
       delete req.headers.cookie;
