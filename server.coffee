@@ -12,6 +12,7 @@ max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
+testMode        = process.env.CAMO_ENV is 'test'
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
 debug_log = (msg) ->
@@ -82,7 +83,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       return four_oh_four(resp, "No host found: #{err}", url)
 
     if address.match(RESTRICTED_IPS)
-      return four_oh_four(resp, "Hitting excluded IP", url)
+      if testMode and address is '127.0.0.1'
+        # don't block localhost server for testing
+      else
+        return four_oh_four(resp, "Hitting excluded IP", url)
 
     fetch_url address, url, transferredHeaders, resp, remaining_redirects
 

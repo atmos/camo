@@ -44,7 +44,7 @@ that the resulting value includes only characters `[0-9a-f]`.
 
 ### Start the server
 
-    % coffee server.coffee
+    % CAMO_ENV=test coffee server.coffee
 
 ### In another shell
 
