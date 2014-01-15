@@ -15,7 +15,7 @@ module CamoProxyTests
   end
 
   def spawn_server(path)
-    pid = Process.spawn("ruby #{path}", :out => "/dev/null")
+    pid = Process.spawn("ruby test/servers/#{path}.rb", :out => "/dev/null")
     begin
       yield
     ensure
@@ -25,7 +25,7 @@ module CamoProxyTests
   end
 
   def test_proxy_survives_redirect_without_location
-    spawn_server("test/proxy_test_server.rb") do
+    spawn_server(:redirect_without_location) do
       assert_raise RestClient::ResourceNotFound do
         request('http://localhost:9292')
       end
