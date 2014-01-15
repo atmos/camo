@@ -79,6 +79,14 @@ module CamoProxyTests
     end
   end
 
+  def test_404s_on_request_error
+    spawn_server(:crash_request) do |host|
+      assert_raise RestClient::ResourceNotFound do
+        request("http://#{host}/cats.png")
+      end
+    end
+  end
+
   def test_404s_on_infinidirect
     assert_raise RestClient::ResourceNotFound do
       request('http://modeselektor.herokuapp.com/')

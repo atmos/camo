@@ -177,8 +177,8 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
       srcReq.abort()
       four_oh_four resp, "Socket timeout", url
 
-    srcReq.on 'error', ->
-      finish resp
+    srcReq.on 'error', (error) ->
+      four_oh_four(resp, "Client Request error #{error.stack}", url)
 
     resp.on 'close', ->
       error_log("Request aborted")

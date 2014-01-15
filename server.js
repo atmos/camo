@@ -227,8 +227,8 @@
         srcReq.abort();
         return four_oh_four(resp, "Socket timeout", url);
       });
-      srcReq.on('error', function() {
-        return finish(resp);
+      srcReq.on('error', function(error) {
+        return four_oh_four(resp, "Client Request error " + error.stack, url);
       });
       resp.on('close', function() {
         error_log("Request aborted");
