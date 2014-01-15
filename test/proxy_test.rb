@@ -17,7 +17,12 @@ module CamoProxyTests
     port = 9292
     config = "test/servers/#{path}.ru"
     host = "localhost:#{port}"
-    pid = Process.spawn("rackup --port #{port} #{config}", [:out, :err] => "/dev/null")
+    pid = fork do
+      STDOUT.reopen "/dev/null"
+      STDERR.reopen "/dev/null"
+      exec "rackup", "--port", port.to_s, config
+    end
+    sleep 2
     begin
       yield host
     ensure
@@ -28,6 +33,9 @@ module CamoProxyTests
 
   def test_proxy_localhost_test_server
     spawn_server(:ok) do |host|
+      response = RestClient.get("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
+
       response = request("http://#{host}/octocat.jpg")
       assert_equal(200, response.code)
     end
