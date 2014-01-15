@@ -4,7 +4,6 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
-require 'thin'
 
 require 'test/unit'
 
@@ -14,10 +13,26 @@ module CamoProxyTests
       'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
   end
 
-  def test_proxy_survives_redirect_without_location
-    assert_raise RestClient::ResourceNotFound do
-      request('http://localhost:9292')
+  def spawn_server(path)
+    port = 9292
+    config = "test/servers/#{path}.ru"
+    host = "localhost:#{port}"
+    pid = Process.spawn("rackup --port #{port} #{config}", [:out, :err] => "/dev/null")
+    begin
+      yield host
+    ensure
+      Process.kill(:TERM, pid)
+      Process.wait(pid)
     end
+  end
+
+  def test_proxy_survives_redirect_without_location
+    spawn_server(:redirect_without_location) do |host|
+      assert_raise RestClient::ResourceNotFound do
+        request("http://#{host}")
+      end
+    end
+
     response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
     assert_equal(200, response.code)
   end
