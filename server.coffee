@@ -14,6 +14,12 @@ socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
+# Enable test mode if no custom keys is configured.
+# This maybe a weak assumption, but no one should be using camo with the
+# default key configuration. Test mode only has the affect of allowing
+# proxying to 127.0.0.1 test servers.
+testMode = !process.env.CAMO_KEY?
+
 debug_log = (msg) ->
   if logging_enabled == "debug"
     console.log("--------------------------------------------")
@@ -64,7 +70,7 @@ class LimitStream extends Stream.Transform
     else
       false
 
-process_url = (url, transferred_headers, resp, remaining_redirects) ->
+process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if !url.host?
     return four_oh_four(resp, "Invalid host", url)
 
@@ -82,31 +88,28 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
       return four_oh_four(resp, "No host found: #{err}", url)
 
     if address.match(RESTRICTED_IPS)
-      return four_oh_four(resp, "Hitting excluded IP", url)
+      if testMode and address is '127.0.0.1'
+        # don't block localhost server for testing
+      else
+        return four_oh_four(resp, "Hitting excluded IP", url)
 
-    fetch_url address, url, transferred_headers, resp, remaining_redirects
+    fetch_url address, url, transferredHeaders, resp, remaining_redirects
 
-  fetch_url = (ip_address, url, transferred_headers, resp, remaining_redirects) ->
-    src = Http.createClient url.port || 80, url.hostname
-
-    src.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}", url)
-
-    query_path = url.pathname
+  fetch_url = (ip_address, url, transferredHeaders, resp, remaining_redirects) ->
+    queryPath = url.pathname
     if url.query?
-      query_path += "?#{url.query}"
+      queryPath += "?#{url.query}"
 
-    transferred_headers.host = url.host
+    transferredHeaders.host = url.host
+    debug_log transferredHeaders
 
-    debug_log transferred_headers
+    requestOptions =
+      hostname: url.hostname
+      port: url.port ? 80
+      path: queryPath
+      headers: transferredHeaders
 
-    srcReq = src.request 'GET', query_path, transferred_headers
-
-    srcReq.setTimeout (socket_timeout * 1000), ()->
-      srcReq.abort()
-      four_oh_four resp, "Socket timeout", url
-
-    srcReq.on 'response', (srcResp) ->
+    srcReq = Http.get requestOptions, (srcResp) ->
       is_finished = true
 
       debug_log srcResp.headers
@@ -171,7 +174,7 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
                 newUrl.protocol = url.protocol
 
               debug_log "Redirected to #{newUrl.format()}"
-              process_url newUrl, transferred_headers, resp, remaining_redirects - 1
+              process_url newUrl, transferredHeaders, resp, remaining_redirects - 1
           when 304
             srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
@@ -179,10 +182,12 @@ process_url = (url, transferred_headers, resp, remaining_redirects) ->
             srcResp.destroy()
             four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
 
-    srcReq.on 'error', ->
-      finish resp
+    srcReq.setTimeout (socket_timeout * 1000), ->
+      srcReq.abort()
+      four_oh_four resp, "Socket timeout", url
 
-    srcReq.end()
+    srcReq.on 'error', (error) ->
+      four_oh_four(resp, "Client Request error #{error.stack}", url)
 
     resp.on 'close', ->
       error_log("Request aborted")
@@ -216,7 +221,7 @@ server = Http.createServer (req, resp) ->
     url = Url.parse req.url
     user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
-    transferred_headers =
+    transferredHeaders =
       'Via'                    : user_agent
       'User-Agent'             : user_agent
       'Accept'                 : req.headers.accept ? 'image/*'
@@ -253,7 +258,7 @@ server = Http.createServer (req, resp) ->
       if hmac_digest == query_digest
         url = Url.parse dest_url
 
-        process_url url, transferred_headers, resp, max_redirects
+        process_url url, transferredHeaders, resp, max_redirects
       else
         four_oh_four(resp, "checksum mismatch #{hmac_digest}:#{query_digest}")
     else

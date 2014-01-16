@@ -17,12 +17,27 @@ module CamoProxyTests
     port = 9292
     config = "test/servers/#{path}.ru"
     host = "localhost:#{port}"
-    pid = Process.spawn("rackup --port #{port} #{config}", [:out, :err] => "/dev/null")
+    pid = fork do
+      STDOUT.reopen "/dev/null"
+      STDERR.reopen "/dev/null"
+      exec "rackup", "--port", port.to_s, config
+    end
+    sleep 2
     begin
       yield host
     ensure
       Process.kill(:TERM, pid)
       Process.wait(pid)
+    end
+  end
+
+  def test_proxy_localhost_test_server
+    spawn_server(:ok) do |host|
+      response = RestClient.get("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
+
+      response = request("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
     end
   end
 
@@ -86,6 +101,14 @@ module CamoProxyTests
   def test_follows_redirects_with_path_only_location_headers
     assert_nothing_raised do
       request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
+    end
+  end
+
+  def test_404s_on_request_error
+    spawn_server(:crash_request) do |host|
+      assert_raise RestClient::ResourceNotFound do
+        request("http://#{host}/cats.png")
+      end
     end
   end
 
