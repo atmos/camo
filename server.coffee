@@ -12,8 +12,13 @@ max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-testMode        = process.env.CAMO_ENV is 'test'
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
+
+# Enable test mode if no custom keys is configured.
+# This maybe a weak assumption, but no one should be using camo with the
+# default key configuration. Test mode only has the affect of allowing
+# proxying to 127.0.0.1 test servers.
+testMode = !process.env.CAMO_KEY?
 
 debug_log = (msg) ->
   if logging_enabled == "debug"

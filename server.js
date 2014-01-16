@@ -30,9 +30,9 @@
 
   logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled";
 
-  testMode = process.env.CAMO_ENV === 'test';
-
   content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10);
+
+  testMode = process.env.CAMO_KEY == null;
 
   debug_log = function(msg) {
     if (logging_enabled === "debug") {
