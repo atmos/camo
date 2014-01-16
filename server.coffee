@@ -2,6 +2,7 @@ Fs          = require 'fs'
 Dns         = require 'dns'
 Url         = require 'url'
 Http        = require 'http'
+Https       = require 'https'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
@@ -74,12 +75,11 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if !url.host?
     return four_oh_four(resp, "Invalid host", url)
 
-  if url.protocol == 'https:'
-    error_log("Redirecting https URL to origin: #{url.format()}")
-    resp.writeHead 301, {'Location': url.format()}
-    finish resp
-    return
-  else if url.protocol != 'http:'
+  if url.protocol is 'https:'
+    Protocol = Https
+  else if url.protocol is 'http:'
+    Protocol = Http
+  else
     four_oh_four(resp, "Unknown protocol", url)
     return
 
@@ -105,11 +105,11 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
     requestOptions =
       hostname: url.hostname
-      port: url.port ? 80
+      port: url.port
       path: queryPath
       headers: transferredHeaders
 
-    srcReq = Http.get requestOptions, (srcResp) ->
+    srcReq = Protocol.get requestOptions, (srcResp) ->
       is_finished = true
 
       debug_log srcResp.headers
