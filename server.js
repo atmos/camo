@@ -67,7 +67,7 @@
   process_url = function(url, transferredHeaders, resp, remaining_redirects) {
     var Protocol, queryPath, requestOptions, srcReq;
     if (url.host != null) {
-      if (url.protocol === 'https') {
+      if (url.protocol === 'https:') {
         Protocol = Https;
       }
       if (url.protocol === 'http:') {

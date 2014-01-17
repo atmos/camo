@@ -40,7 +40,7 @@ finish = (resp, str) ->
 
 process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if url.host?
-    if url.protocol is 'https'
+    if url.protocol is 'https:'
       Protocol = Https
     if url.protocol is 'http:'
       Protocol = Http
