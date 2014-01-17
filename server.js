@@ -69,10 +69,9 @@
     if (url.host != null) {
       if (url.protocol === 'https:') {
         Protocol = Https;
-      }
-      if (url.protocol === 'http:') {
+      } else if (url.protocol === 'http:') {
         Protocol = Http;
-      } else if (url.protocol !== 'http:') {
+      } else {
         four_oh_four(resp, "Unknown protocol", url);
         return;
       }

@@ -42,9 +42,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if url.host?
     if url.protocol is 'https:'
       Protocol = Https
-    if url.protocol is 'http:'
+    else if url.protocol is 'http:'
       Protocol = Http
-    else if url.protocol != 'http:'
+    else
       four_oh_four(resp, "Unknown protocol", url)
       return
 
