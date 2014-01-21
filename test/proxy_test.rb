@@ -4,7 +4,6 @@ require 'base64'
 require 'openssl'
 require 'rest_client'
 require 'addressable/uri'
-require 'thin'
 
 require 'test/unit'
 
@@ -14,10 +13,41 @@ module CamoProxyTests
       'host' => ENV['CAMO_HOST'] || "http://localhost:8081" }
   end
 
-  def test_proxy_survives_redirect_without_location
-    assert_raise RestClient::ResourceNotFound do
-      request('http://localhost:9292')
+  def spawn_server(path)
+    port = 9292
+    config = "test/servers/#{path}.ru"
+    host = "localhost:#{port}"
+    pid = fork do
+      STDOUT.reopen "/dev/null"
+      STDERR.reopen "/dev/null"
+      exec "rackup", "--port", port.to_s, config
     end
+    sleep 2
+    begin
+      yield host
+    ensure
+      Process.kill(:TERM, pid)
+      Process.wait(pid)
+    end
+  end
+
+  def test_proxy_localhost_test_server
+    spawn_server(:ok) do |host|
+      response = RestClient.get("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
+
+      response = request("http://#{host}/octocat.jpg")
+      assert_equal(200, response.code)
+    end
+  end
+
+  def test_proxy_survives_redirect_without_location
+    spawn_server(:redirect_without_location) do |host|
+      assert_raise RestClient::ResourceNotFound do
+        request("http://#{host}")
+      end
+    end
+
     response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
     assert_equal(200, response.code)
   end
@@ -48,6 +78,16 @@ module CamoProxyTests
     assert_nil(response.headers[:content_length])
   end
 
+  def test_proxy_https_octocat
+    response = request('https://octodex.github.com/images/original.png')
+    assert_equal(200, response.code)
+  end
+
+  def test_proxy_https_gravatar
+    response = request('https://1.gravatar.com/avatar/a86224d72ce21cd9f5bee6784d4b06c7')
+    assert_equal(200, response.code)
+  end
+
   def test_follows_redirects
     response = request('http://cl.ly/1K0X2Y2F1P0o3z140p0d/boom-headshot.gif')
     assert_equal(200, response.code)
@@ -61,6 +101,14 @@ module CamoProxyTests
   def test_follows_redirects_with_path_only_location_headers
     assert_nothing_raised do
       request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
+    end
+  end
+
+  def test_404s_on_request_error
+    spawn_server(:crash_request) do |host|
+      assert_raise RestClient::ResourceNotFound do
+        request("http://#{host}/cats.png")
+      end
     end
   end
 
@@ -94,29 +142,9 @@ module CamoProxyTests
     end
   end
 
-  def test_404s_on_10_0_ip_range
+  def test_404s_on_connect_timeout
     assert_raise RestClient::ResourceNotFound do
       request('http://10.0.0.1/foo.cgi')
-    end
-  end
-
-  16.upto(31) do |i|
-    define_method :"test_404s_on_172_#{i}_ip_range" do
-      assert_raise RestClient::ResourceNotFound do
-        request("http://172.#{i}.0.1/foo.cgi")
-      end
-    end
-  end
-
-  def test_404s_on_169_254_ip_range
-    assert_raise RestClient::ResourceNotFound do
-      request('http://169.254.0.1/foo.cgi')
-    end
-  end
-
-  def test_404s_on_192_168_ip_range
-    assert_raise RestClient::ResourceNotFound do
-      request('http://192.168.0.1/foo.cgi')
     end
   end
 
