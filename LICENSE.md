@@ -1,4 +1,4 @@
-Copyright (c) 2010 Corey Donohoe, Rick Olson
+Copyright (c) 2010-2014 Corey Donohoe, Rick Olson
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
