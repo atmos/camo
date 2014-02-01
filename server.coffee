@@ -6,13 +6,15 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "1.4.0"
+version         = "1.9.1"
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
+
+accepted_image_mime_types = JSON.parse(Fs.readFileSync("mime-types.json", encoding: 'utf8'))
 
 debug_log = (msg) ->
   if logging_enabled == "debug"
@@ -73,7 +75,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
         four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
+          'etag'                   : srcResp.headers['etag']
+          'expires'                : srcResp.headers['expires']
           'content-type'           : srcResp.headers['content-type']
+          'last-modified'          : srcResp.headers['last-modified']
           'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
@@ -95,9 +100,18 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
         switch srcResp.statusCode
           when 200
-            if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
+            contentType = newHeaders['content-type']
+
+            unless contentType?
               srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned", url)
+              four_oh_four(resp, "No content-type returned", url)
+              return
+
+            contentTypePrefix = contentType.split(";")[0]
+
+            unless contentTypePrefix in accepted_image_mime_types
+              srcResp.destroy()
+              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
               return
 
             debug_log newHeaders
