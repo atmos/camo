@@ -123,6 +123,11 @@
           });
           switch (srcResp.statusCode) {
             case 200:
+              if (newHeaders['content-type'] == null) {
+                srcResp.destroy();
+                four_oh_four(resp, "Non-Image content-type returned", url);
+                return;
+              }
               if (newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) !== 'image') {
                 srcResp.destroy();
                 four_oh_four(resp, "Non-Image content-type returned", url);

@@ -95,6 +95,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
         switch srcResp.statusCode
           when 200
+            unless newHeaders['content-type']?
+              srcResp.destroy()
+              four_oh_four(resp, "Non-Image content-type returned", url)
+              return
             if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
               srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
