@@ -129,7 +129,6 @@
           switch (srcResp.statusCode) {
             case 200:
               contentType = newHeaders['content-type'];
-              console.log(contentType);
               if (contentType && __indexOf.call(accepted_image_mime_types, contentType) < 0) {
                 srcResp.destroy();
                 four_oh_four(resp, "Non-Image content-type returned", url);
