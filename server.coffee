@@ -14,6 +14,8 @@ socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
+accepted_image_mime_types = JSON.parse(Fs.readFileSync("mime-types.json", encoding: 'utf8'))
+
 debug_log = (msg) ->
   if logging_enabled == "debug"
     console.log("--------------------------------------------")
@@ -95,11 +97,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
         switch srcResp.statusCode
           when 200
-            unless newHeaders['content-type']?
-              srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned", url)
-              return
-            if newHeaders['content-type'] && newHeaders['content-type'].slice(0, 5) != 'image'
+            contentType = newHeaders['content-type']
+
+            if contentType and contentType not in accepted_image_mime_types
               srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
               return
