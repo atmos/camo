@@ -99,6 +99,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           when 200
             contentType = newHeaders['content-type']
 
+            unless contentType?
+              srcResp.destroy()
+              four_oh_four(resp, "Non-Image content-type returned", url)
+              return
             if contentType and contentType not in accepted_image_mime_types
               srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
