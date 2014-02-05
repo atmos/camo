@@ -103,7 +103,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
               srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
               return
-            if contentType and contentType not in accepted_image_mime_types
+
+            contentTypePrefix = contentType.split(";")
+
+            if contentTypePrefix and contentTypePrefix not in accepted_image_mime_types
               srcResp.destroy()
               four_oh_four(resp, "Non-Image content-type returned", url)
               return
