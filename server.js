@@ -93,7 +93,7 @@
         headers: transferredHeaders
       };
       srcReq = Protocol.get(requestOptions, function(srcResp) {
-        var contentType, content_length, is_finished, newHeaders, newUrl;
+        var contentType, contentTypePrefix, content_length, is_finished, newHeaders, newUrl;
         is_finished = true;
         debug_log(srcResp.headers);
         content_length = srcResp.headers['content-length'];
@@ -131,12 +131,13 @@
               contentType = newHeaders['content-type'];
               if (contentType == null) {
                 srcResp.destroy();
-                four_oh_four(resp, "Non-Image content-type returned", url);
+                four_oh_four(resp, "No content-type returned", url);
                 return;
               }
-              if (contentType && __indexOf.call(accepted_image_mime_types, contentType) < 0) {
+              contentTypePrefix = contentType.split(";")[0];
+              if (__indexOf.call(accepted_image_mime_types, contentTypePrefix) < 0) {
                 srcResp.destroy();
-                four_oh_four(resp, "Non-Image content-type returned", url);
+                four_oh_four(resp, "Non-Image content-type returned '" + contentTypePrefix + "'", url);
                 return;
               }
               debug_log(newHeaders);

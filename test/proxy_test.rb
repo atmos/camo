@@ -62,6 +62,16 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_svg_image_with_delimited_content_type_url
+    response = request('https://saucelabs.com/browser-matrix/bootstrap.svg')
+    assert_equal(200, response.code)
+  end
+
+  def test_png_image_with_delimited_content_type_url
+    response = request('http://uploadir.com/u/cm5el1v7')
+    assert_equal(200, response.code)
+  end
+
   def test_proxy_valid_image_url_with_crazy_subdomain
     response = request('http://27.media.tumblr.com/tumblr_lkp6rdDfRi1qce6mto1_500.jpg')
     assert_equal(200, response.code)
