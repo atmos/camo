@@ -131,13 +131,13 @@
               contentType = newHeaders['content-type'];
               if (contentType == null) {
                 srcResp.destroy();
-                four_oh_four(resp, "Non-Image content-type returned", url);
+                four_oh_four(resp, "No content-type returned", url);
                 return;
               }
               contentTypePrefix = contentType.split(";")[0];
-              if (contentTypePrefix && __indexOf.call(accepted_image_mime_types, contentTypePrefix) < 0) {
+              if (__indexOf.call(accepted_image_mime_types, contentTypePrefix) < 0) {
                 srcResp.destroy();
-                four_oh_four(resp, "Non-Image content-type returned", url);
+                four_oh_four(resp, "Non-Image content-type returned '" + contentTypePrefix + "'", url);
                 return;
               }
               debug_log(newHeaders);
