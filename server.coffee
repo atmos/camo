@@ -215,6 +215,5 @@ server = Http.createServer (req, resp) ->
       four_oh_four(resp, "No pathname provided on the server")
 
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
-console.log "Using the secret key #{shared_key}"
 
 server.listen port
