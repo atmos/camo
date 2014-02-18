@@ -102,7 +102,10 @@
           return four_oh_four(resp, "Content-Length exceeded", url);
         } else {
           newHeaders = {
+            'etag': srcResp.headers['etag'],
+            'expires': srcResp.headers['expires'],
             'content-type': srcResp.headers['content-type'],
+            'last-modified': srcResp.headers['last-modified'],
             'cache-control': srcResp.headers['cache-control'] || 'public, max-age=31536000',
             'Camo-Host': camo_hostname,
             'X-Content-Type-Options': 'nosniff'
