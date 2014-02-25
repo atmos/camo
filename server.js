@@ -17,7 +17,7 @@
 
   port = parseInt(process.env.PORT || 8081);
 
-  version = "1.9.1";
+  version = "2.0.1";
 
   shared_key = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE';
 
@@ -265,8 +265,6 @@
   });
 
   console.log("SSL-Proxy running on " + port + " with pid:" + process.pid + ".");
-
-  console.log("Using the secret key " + shared_key);
 
   server.listen(port);
 
