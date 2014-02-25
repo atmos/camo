@@ -17,7 +17,7 @@
 
   port = parseInt(process.env.PORT || 8081);
 
-  version = "2.0.0";
+  version = "2.0.1";
 
   shared_key = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE';
 
