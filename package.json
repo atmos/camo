@@ -2,6 +2,7 @@
   "name": "camo",
   "version": "2.0.1",
   "dependencies": {
+    "buffer-equal-constant-time": "~1.0.1"
   },
   "engines": {
     "node": "^0.10.21"

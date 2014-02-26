@@ -4,6 +4,7 @@ Http        = require 'http'
 Https       = require 'https'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+bufferEq    = require 'buffer-equal-constant-time'
 
 port            = parseInt process.env.PORT        || 8081
 version         = "2.0.1"
@@ -211,16 +212,16 @@ server = Http.createServer (req, resp) ->
 
     if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url, 'utf8')
+      hmac.update(dest_url, 'ascii')
+      hmac_digest_buf = hmac.digest()
+      query_digest_buf = new Buffer(query_digest, 'hex')
 
-      hmac_digest = hmac.digest('hex')
-
-      if hmac_digest == query_digest
+      if bufferEq(hmac_digest_buf, query_digest_buf)
         url = Url.parse dest_url
 
         process_url url, transferredHeaders, resp, max_redirects
       else
-        four_oh_four(resp, "checksum mismatch #{hmac_digest}:#{query_digest}")
+        four_oh_four(resp, "checksum mismatch #{hmac_digest_buf.toString('hex')}:#{query_digest}")
     else
       four_oh_four(resp, "No pathname provided on the server")
 
