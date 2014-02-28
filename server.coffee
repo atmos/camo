@@ -83,6 +83,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
 
+        if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
+          newHeaders['Timing-Allow-Origin'] = origin
+
         # Handle chunked responses properly
         if content_length?
           newHeaders['content-length'] = content_length
