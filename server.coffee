@@ -188,6 +188,9 @@ server = Http.createServer (req, resp) ->
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-content-type-options' : 'nosniff'
 
+    if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
+      transferredHeaders['Timing-Allow-Origin'] = origin
+
     delete(req.headers.cookie)
 
     [query_digest, encoded_url] = url.pathname.replace(/^\//, '').split("/", 2)
