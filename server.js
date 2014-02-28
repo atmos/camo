@@ -207,7 +207,7 @@
   };
 
   server = Http.createServer(function(req, resp) {
-    var dest_url, encoded_url, hmac, hmac_digest, query_digest, transferredHeaders, url, url_type, user_agent, _base, _ref, _ref1;
+    var dest_url, encoded_url, hmac, hmac_digest, origin, query_digest, transferredHeaders, url, url_type, user_agent, _base, _ref, _ref1;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200);
       return resp.end('hwhat');
@@ -229,6 +229,9 @@
         'Accept-Encoding': req.headers['accept-encoding'],
         'x-content-type-options': 'nosniff'
       };
+      if (origin = process.env.CAMO_TIMING_ALLOW_ORIGIN) {
+        transferredHeaders['Timing-Allow-Origin'] = origin;
+      }
       delete req.headers.cookie;
       _ref1 = url.pathname.replace(/^\//, '').split("/", 2), query_digest = _ref1[0], encoded_url = _ref1[1];
       if (encoded_url = hexdec(encoded_url)) {
