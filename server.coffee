@@ -83,6 +83,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
 
+        if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
+          newHeaders['Timing-Allow-Origin'] = origin
+
         # Handle chunked responses properly
         if content_length?
           newHeaders['content-length'] = content_length
@@ -187,9 +190,6 @@ server = Http.createServer (req, resp) ->
       'Accept'                 : req.headers.accept ? 'image/*'
       'Accept-Encoding'        : req.headers['accept-encoding']
       'x-content-type-options' : 'nosniff'
-
-    if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
-      transferredHeaders['Timing-Allow-Origin'] = origin
 
     delete(req.headers.cookie)
 
