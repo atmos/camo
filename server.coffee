@@ -14,10 +14,9 @@ camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
-script_directory = Path.dirname(require.main.filename)
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
-  Path.resolve(script_directory, "mime-types.json"),
+  Path.resolve(__dirname, "mime-types.json"),
   encoding: 'utf8'
 ))
 
