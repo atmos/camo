@@ -97,7 +97,7 @@
         headers: transferredHeaders
       };
       srcReq = Protocol.get(requestOptions, function(srcResp) {
-        var contentType, contentTypePrefix, content_length, is_finished, newHeaders, newUrl, origin;
+        var contentType, contentTypePrefix, content_length, eTag, expiresHeader, is_finished, lastModified, newHeaders, newUrl, origin;
         is_finished = true;
         debug_log(srcResp.headers);
         content_length = srcResp.headers['content-length'];
@@ -106,14 +106,20 @@
           return four_oh_four(resp, "Content-Length exceeded", url);
         } else {
           newHeaders = {
-            'etag': srcResp.headers['etag'],
-            'expires': srcResp.headers['expires'],
             'content-type': srcResp.headers['content-type'],
-            'last-modified': srcResp.headers['last-modified'],
             'cache-control': srcResp.headers['cache-control'] || 'public, max-age=31536000',
             'Camo-Host': camo_hostname,
             'X-Content-Type-Options': 'nosniff'
           };
+          if (eTag = srcResp.headers['etag']) {
+            newHeaders['etag'] = eTag;
+          }
+          if (expiresHeader = srcResp.headers['expires']) {
+            newHeaders['expires'] = expiresHeader;
+          }
+          if (lastModified = srcResp.headers['last-modified']) {
+            newHeaders['last-modified'] = lastModified;
+          }
           if (origin = process.env.CAMO_TIMING_ALLOW_ORIGIN) {
             newHeaders['Timing-Allow-Origin'] = origin;
           }
