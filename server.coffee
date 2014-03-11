@@ -33,6 +33,10 @@ started_at          = new Date
 four_oh_four = (resp, msg, url) ->
   error_log "#{msg}: #{url?.format() or 'unknown'}"
   resp.writeHead 404
+  if resp.headers
+    resp.headers["expires"] = "0"
+    resp.headers["cache-control"] = "no-cache, no-store, private, must-revalidate"
+
   finish resp, "Not Found"
 
 finish = (resp, str) ->
@@ -75,13 +79,19 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
         four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
-          'etag'                   : srcResp.headers['etag']
-          'expires'                : srcResp.headers['expires']
           'content-type'           : srcResp.headers['content-type']
-          'last-modified'          : srcResp.headers['last-modified']
           'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
           'Camo-Host'              : camo_hostname
           'X-Content-Type-Options' : 'nosniff'
+
+        if eTag = srcResp.headers['etag']
+          newHeaders['etag'] = eTag
+
+        if expiresHeader = srcResp.headers['expires']
+          newHeaders['expires'] = expiresHeader
+
+        if lastModified = srcResp.headers['last-modified']
+          newHeaders['last-modified'] = lastModified
 
         if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
           newHeaders['Timing-Allow-Origin'] = origin
