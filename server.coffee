@@ -1,5 +1,6 @@
 Fs          = require 'fs'
 Url         = require 'url'
+Path        = require 'path'
 Http        = require 'http'
 Https       = require 'https'
 Crypto      = require 'crypto'
@@ -14,7 +15,10 @@ socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
-accepted_image_mime_types = JSON.parse(Fs.readFileSync("mime-types.json", encoding: 'utf8'))
+accepted_image_mime_types = JSON.parse(Fs.readFileSync(
+  Path.resolve(__dirname, "mime-types.json"),
+  encoding: 'utf8'
+))
 
 debug_log = (msg) ->
   if logging_enabled == "debug"
