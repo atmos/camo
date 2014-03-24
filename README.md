@@ -1,22 +1,21 @@
-![camo](http://farm5.static.flickr.com/4116/4857328881_fefb8e2134_z.jpg)
-
 Camo is all about making insecure assets look secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [GitHub](https://github.com).
 
-We want to allow people to keep embedding images in comments/issues/READMEs/google charting.
+![camo](https://f.cloud.github.com/assets/38/2496172/f558bbb4-b312-11e3-88e9-646b77e47e6e.gif)
+
+We want to allow people to keep embedding images in comments/issues/READMEs.
 
 [There's more info on the GitHub blog](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets).
 
 Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
-Camo currently runs on node version 0.10.13 at GitHub on [heroku](http://heroku.com).
+Camo currently runs on node version 0.10.26 at GitHub on [heroku](http://heroku.com).
 
 Features
 --------
 
-* Proxy google charts
-* Proxy images under 5 MB
-* Follow redirects to a configurable depth
-* Proxy remote images with a content-type of `image/*`
+* Max size for proxied images
+* Follow redirects to a certain depth
+* Restricts proxied images content-types to a whitelist
 * 404s for anything other than a 200, 301, 302, 303, 304 or 307 HTTP response
 
 At GitHub we render markdown and replace all of the `src` attributes on the `img` tags with the appropriate URL to hit the proxies.  There's example code for creating URLs in [the tests](https://github.com/atmos/camo/blob/master/test/proxy_test.rb).
