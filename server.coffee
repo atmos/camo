@@ -79,10 +79,11 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
         four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
-          'content-type'           : srcResp.headers['content-type']
-          'cache-control'          : srcResp.headers['cache-control'] || 'public, max-age=31536000'
-          'Camo-Host'              : camo_hostname
-          'X-Content-Type-Options' : 'nosniff'
+          'content-type'              : srcResp.headers['content-type']
+          'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
+          'Camo-Host'                 : camo_hostname
+          'X-Content-Type-Options'    : 'nosniff'
+          'Strict-Transport-Security' : 'max-age=31536000; includeSubDomains'
 
         if eTag = srcResp.headers['etag']
           newHeaders['etag'] = eTag
