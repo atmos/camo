@@ -110,7 +110,7 @@
             'cache-control': srcResp.headers['cache-control'] || 'public, max-age=31536000',
             'Camo-Host': camo_hostname,
             'X-Content-Type-Options': 'nosniff',
-            'Strict-Transport-Security': 'max-age=15768000 ; includeSubDomains'
+            'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
           };
           if (eTag = srcResp.headers['etag']) {
             newHeaders['etag'] = eTag;
