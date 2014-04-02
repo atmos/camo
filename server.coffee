@@ -228,7 +228,7 @@ server = Http.createServer (req, resp) ->
     if req.headers['via'] && req.headers['via'].indexOf(user_agent) != -1
       return four_oh_four(resp, "Requesting from self")
 
-    if url.pathname? && dest_url
+    if url.pathname? && dest_url && typeof dest_url == "string"
       hmac = Crypto.createHmac("sha1", shared_key)
       hmac.update(dest_url, 'utf8')
 

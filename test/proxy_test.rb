@@ -57,9 +57,9 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
-  def test_doesnt_crash_on_weird_google_page
+  def test_doesnt_crash_with_non_url_encoded_url
     assert_raise RestClient::ResourceNotFound do
-      request('http://www.google.com/url?sa=i&rct=j&q=gods+vs+monsters&source=images&cd=&cad=rja&uact=8&docid=_0iam5px020tzM&tbnid=9ymq63Dc-U7VUM:&ved=0CAUQjRw&url=http%3A%2F%2Fwww.gamepur.com%2Fnews%2F13599-zeus-vs-monsters-math-game-introduce-you-greek-mythological-gods.html&ei=wxk8U4eQBIXjsAT144H4BA&bvm=bv.63934634,d.dmQ&psig=AFQjCNGZm4kOwGHiaXbC9kdyIwNYaWJiWg&ust=1396534065556323')
+      RestClient.get("#{config['host']}/crashme?url=crash&url=me")
     end
   end
 
