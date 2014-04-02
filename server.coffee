@@ -230,7 +230,11 @@ server = Http.createServer (req, resp) ->
 
     if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url, 'utf8')
+
+      try
+        hmac.update(dest_url, 'utf8')
+      catch error
+        return four_oh_four(resp, "could not create checksum")
 
       hmac_digest = hmac.digest('hex')
 
