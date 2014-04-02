@@ -228,9 +228,13 @@ server = Http.createServer (req, resp) ->
     if req.headers['via'] && req.headers['via'].indexOf(user_agent) != -1
       return four_oh_four(resp, "Requesting from self")
 
-    if url.pathname? && dest_url && typeof dest_url == "string"
+    if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url, 'utf8')
+
+      try
+        hmac.update(dest_url, 'utf8')
+      catch error
+        return four_oh_four(resp, "could not create checksum")
 
       hmac_digest = hmac.digest('hex')
 
