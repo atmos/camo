@@ -21,7 +21,7 @@
 
   port = parseInt(process.env.PORT || 8081);
 
-  version = require(Path.resolve(__dirname, "package").version);
+  version = require(Path.resolve(__dirname, "package.json")).version;
 
   shared_key = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE';
 
@@ -287,7 +287,7 @@
     }
   });
 
-  console.log("SSL-Proxy running on " + port + " with pid:" + process.pid + ".");
+  console.log("SSL-Proxy running on " + port + " with pid:" + process.pid + " version:" + version + ".");
 
   server.listen(port);
 
