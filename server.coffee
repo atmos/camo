@@ -8,7 +8,7 @@ Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081
-version         = "2.0.2"
+version         = require(Path.resolve(__dirname, "package.json")).version
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
@@ -230,7 +230,11 @@ server = Http.createServer (req, resp) ->
 
     if url.pathname? && dest_url
       hmac = Crypto.createHmac("sha1", shared_key)
-      hmac.update(dest_url, 'utf8')
+
+      try
+        hmac.update(dest_url, 'utf8')
+      catch error
+        return four_oh_four(resp, "could not create checksum")
 
       hmac_digest = hmac.digest('hex')
 
@@ -243,6 +247,6 @@ server = Http.createServer (req, resp) ->
     else
       four_oh_four(resp, "No pathname provided on the server")
 
-console.log "SSL-Proxy running on #{port} with pid:#{process.pid}."
+console.log "SSL-Proxy running on #{port} with pid:#{process.pid} version:#{version}."
 
 server.listen port

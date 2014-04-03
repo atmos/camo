@@ -57,6 +57,12 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_doesnt_crash_with_non_url_encoded_url
+    assert_raise RestClient::ResourceNotFound do
+      RestClient.get("#{config['host']}/crashme?url=crash&url=me")
+    end
+  end
+
   def test_proxy_valid_image_url
     response = request('http://media.ebaumsworld.com/picture/Mincemeat/Pimp.jpg')
     assert_equal(200, response.code)
