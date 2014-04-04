@@ -187,6 +187,14 @@ module CamoProxyTests
       response = request( uri )
     end
   end
+
+  def test_404s_send_cache_headers
+    uri = request_uri("http://example.org/")
+    response = RestClient.get(uri){ |response, request, result| response }
+    assert_equal(404, response.code)
+    assert_equal("0", response.headers[:expires])
+    assert_equal("no-cache, no-store, private, must-revalidate", response.headers[:cache_control])
+  end
 end
 
 class CamoProxyQueryStringTest < Test::Unit::TestCase
