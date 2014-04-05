@@ -37,10 +37,9 @@ started_at          = new Date
 
 four_oh_four = (resp, msg, url) ->
   error_log "#{msg}: #{url?.format() or 'unknown'}"
-  resp.writeHead 404
-  if resp.headers
-    resp.headers["expires"] = "0"
-    resp.headers["cache-control"] = "no-cache, no-store, private, must-revalidate"
+  resp.writeHead 404,
+    expires: "0"
+    "cache-control": "no-cache, no-store, private, must-revalidate"
 
   finish resp, "Not Found"
 

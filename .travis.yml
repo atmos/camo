@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+- 2.1.0
+gemfile: test.gemfile
+before_install:
+- npm install -g coffee-script
+- gem install rake
+before_script:
+- node --version
+- npm --version
+- coffee server.coffee &
+script: rake
