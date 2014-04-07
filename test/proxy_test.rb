@@ -67,14 +67,14 @@ module CamoProxyTests
     ['/', '/status'].each do |path|
       response = RestClient.get("#{config['host']}#{path}")
       assert_equal "deny", response.headers[:x_frame_options]
-      assert_equal "'none'", response.headers[:content_security_policy]
+      assert_equal "default-src 'none'", response.headers[:content_security_policy]
       assert_equal "nosniff", response.headers[:x_content_type_options]
       assert_equal "max-age=31536000; includeSubDomains", response.headers[:strict_transport_security]
     end
 
     response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
     assert_equal "deny", response.headers[:x_frame_options]
-    assert_equal "'none'", response.headers[:content_security_policy]
+    assert_equal "default-src 'none'", response.headers[:content_security_policy]
     assert_equal "nosniff", response.headers[:x_content_type_options]
     assert_equal "max-age=31536000; includeSubDomains", response.headers[:strict_transport_security]
   end
