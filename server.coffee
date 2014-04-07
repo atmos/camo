@@ -39,7 +39,11 @@ four_oh_four = (resp, msg, url) ->
   error_log "#{msg}: #{url?.format() or 'unknown'}"
   resp.writeHead 404,
     expires: "0"
-    "cache-control": "no-cache, no-store, private, must-revalidate"
+    "Cache-Control": "no-cache, no-store, private, must-revalidate"
+    "X-Frame-Options": "deny"
+    "X-Content-Type-Options": "nosniff"
+    "Content-Security-Policy": "none"
+    "Strict-Transport-Security" : "max-age=31536000; includeSubDomains"
 
   finish resp, "Not Found"
 
@@ -86,7 +90,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           'content-type'              : srcResp.headers['content-type']
           'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
           'Camo-Host'                 : camo_hostname
+          'X-Frame-Options'           : 'deny'
           'X-Content-Type-Options'    : 'nosniff'
+          'Content-Security-Policy'   : 'none'
           'Strict-Transport-Security' : 'max-age=31536000; includeSubDomains'
 
         if eTag = srcResp.headers['etag']
