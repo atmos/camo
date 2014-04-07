@@ -35,15 +35,21 @@ total_connections   = 0
 current_connections = 0
 started_at          = new Date
 
+default_security_headers =
+  "X-Frame-Options": "deny"
+  "X-Content-Type-Options": "nosniff"
+  "Content-Security-Policy": "none"
+  "Strict-Transport-Security" : "max-age=31536000; includeSubDomains"
+
 four_oh_four = (resp, msg, url) ->
   error_log "#{msg}: #{url?.format() or 'unknown'}"
   resp.writeHead 404,
     expires: "0"
     "Cache-Control": "no-cache, no-store, private, must-revalidate"
-    "X-Frame-Options": "deny"
-    "X-Content-Type-Options": "nosniff"
-    "Content-Security-Policy": "none"
-    "Strict-Transport-Security" : "max-age=31536000; includeSubDomains"
+    "X-Frame-Options"           : default_security_headers["X-Frame-Options"]
+    "X-Content-Type-Options"    : default_security_headers["X-Content-Type-Options"]
+    "Content-Security-Policy"   : default_security_headers["Content-Security-Policy"]
+    "Strict-Transport-Security" : default_security_headers["Strict-Transport-Security"]
 
   finish resp, "Not Found"
 
@@ -90,10 +96,10 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           'content-type'              : srcResp.headers['content-type']
           'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
           'Camo-Host'                 : camo_hostname
-          'X-Frame-Options'           : 'deny'
-          'X-Content-Type-Options'    : 'nosniff'
-          'Content-Security-Policy'   : 'none'
-          'Strict-Transport-Security' : 'max-age=31536000; includeSubDomains'
+          'X-Frame-Options'           : default_security_headers['X-Frame-Options']
+          'X-Content-Type-Options'    : default_security_headers['X-Content-Type-Options']
+          'Content-Security-Policy'   : default_security_headers['Content-Security-Policy']
+          'Strict-Transport-Security' : default_security_headers['Strict-Transport-Security']
 
         if eTag = srcResp.headers['etag']
           newHeaders['etag'] = eTag
@@ -191,13 +197,13 @@ hexdec = (str) ->
 
 server = Http.createServer (req, resp) ->
   if req.method != 'GET' || req.url == '/'
-    resp.writeHead 200
+    resp.writeHead 200, default_security_headers
     resp.end 'hwhat'
   else if req.url == '/favicon.ico'
-    resp.writeHead 200
+    resp.writeHead 200, default_security_headers
     resp.end 'ok'
   else if req.url == '/status'
-    resp.writeHead 200
+    resp.writeHead 200, default_security_headers
     resp.end "ok #{current_connections}/#{total_connections} since #{started_at.toString()}"
   else
     total_connections   += 1
@@ -206,11 +212,13 @@ server = Http.createServer (req, resp) ->
     user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
     transferredHeaders =
-      'Via'                    : user_agent
-      'User-Agent'             : user_agent
-      'Accept'                 : req.headers.accept ? 'image/*'
-      'Accept-Encoding'        : req.headers['accept-encoding']
-      'x-content-type-options' : 'nosniff'
+      'Via'                     : user_agent
+      'User-Agent'              : user_agent
+      'Accept'                  : req.headers.accept ? 'image/*'
+      'Accept-Encoding'         : req.headers['accept-encoding']
+      "X-Frame-Options"         : default_security_headers["X-Frame-Options"]
+      "X-Content-Type-Options"  : default_security_headers["X-Content-Type-Options"]
+      "Content-Security-Policy" : default_security_headers["Content-Security-Policy"]
 
     delete(req.headers.cookie)
 
