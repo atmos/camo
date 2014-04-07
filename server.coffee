@@ -38,7 +38,7 @@ started_at          = new Date
 default_security_headers =
   "X-Frame-Options": "deny"
   "X-Content-Type-Options": "nosniff"
-  "Content-Security-Policy": "none"
+  "Content-Security-Policy": "'none'"
   "Strict-Transport-Security" : "max-age=31536000; includeSubDomains"
 
 four_oh_four = (resp, msg, url) ->
