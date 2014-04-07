@@ -62,7 +62,7 @@
   default_security_headers = {
     "X-Frame-Options": "deny",
     "X-Content-Type-Options": "nosniff",
-    "Content-Security-Policy": "'none'",
+    "Content-Security-Policy": "default-src 'none'",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
   };
 
