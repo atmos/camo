@@ -19,7 +19,7 @@
 
   QueryString = require('querystring');
 
-  port = parseInt(process.env.PORT || 8081);
+  port = parseInt(process.env.PORT || 8081, 10);
 
   version = require(Path.resolve(__dirname, "package.json")).version;
 
