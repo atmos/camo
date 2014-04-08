@@ -61,6 +61,7 @@
 
   default_security_headers = {
     "X-Frame-Options": "deny",
+    "X-XSS-Protection": "1; mode=block",
     "X-Content-Type-Options": "nosniff",
     "Content-Security-Policy": "default-src 'none'",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
@@ -72,6 +73,7 @@
       expires: "0",
       "Cache-Control": "no-cache, no-store, private, must-revalidate",
       "X-Frame-Options": default_security_headers["X-Frame-Options"],
+      "X-XSS-Protection": default_security_headers["X-XSS-Protection"],
       "X-Content-Type-Options": default_security_headers["X-Content-Type-Options"],
       "Content-Security-Policy": default_security_headers["Content-Security-Policy"],
       "Strict-Transport-Security": default_security_headers["Strict-Transport-Security"]
@@ -124,6 +126,7 @@
             'cache-control': srcResp.headers['cache-control'] || 'public, max-age=31536000',
             'Camo-Host': camo_hostname,
             'X-Frame-Options': default_security_headers['X-Frame-Options'],
+            'X-XSS-Protection': default_security_headers['X-XSS-Protection'],
             'X-Content-Type-Options': default_security_headers['X-Content-Type-Options'],
             'Content-Security-Policy': default_security_headers['Content-Security-Policy'],
             'Strict-Transport-Security': default_security_headers['Strict-Transport-Security']
@@ -258,6 +261,7 @@
         'Accept': (_ref = req.headers.accept) != null ? _ref : 'image/*',
         'Accept-Encoding': req.headers['accept-encoding'],
         "X-Frame-Options": default_security_headers["X-Frame-Options"],
+        "X-XSS-Protection": default_security_headers["X-XSS-Protection"],
         "X-Content-Type-Options": default_security_headers["X-Content-Type-Options"],
         "Content-Security-Policy": default_security_headers["Content-Security-Policy"]
       };
