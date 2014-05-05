@@ -69,7 +69,7 @@ To see the full URL restclient is hitting etc, try this.
 
 ### Deployment
 
-You can see an example [god config](https://gist.github.com/675038) here.
+You should run this on heroku.
 
 To enable useful line numbers in stacktraces you probably want to compile the server.coffee file to native javascript when deploying.
 
