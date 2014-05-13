@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/atmos/camo.svg?branch=master)](https://travis-ci.org/atmos/camo)
+
 Camo is all about making insecure assets look secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [GitHub](https://github.com).
 
 ![camo](https://f.cloud.github.com/assets/38/2496172/f558bbb4-b312-11e3-88e9-646b77e47e6e.gif)
