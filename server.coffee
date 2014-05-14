@@ -9,12 +9,13 @@ QueryString = require 'querystring'
 
 port            = parseInt process.env.PORT        || 8081, 10
 version         = require(Path.resolve(__dirname, "package.json")).version
-shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
+shared_key      = process.env.CAMO_KEY
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
+allowed_referers = (process.env.CAMO_ALLOWED_REFERERS || '').split(',')
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
   Path.resolve(__dirname, "mime-types.json"),
@@ -103,6 +104,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           'X-Content-Type-Options'    : default_security_headers['X-Content-Type-Options']
           'Content-Security-Policy'   : default_security_headers['Content-Security-Policy']
           'Strict-Transport-Security' : default_security_headers['Strict-Transport-Security']
+
+        if not shared_key and referer = srcResp.headers['referer']
+          newHeaders['referer'] = referer
 
         if eTag = srcResp.headers['etag']
           newHeaders['etag'] = eTag
@@ -245,7 +249,7 @@ server = Http.createServer (req, resp) ->
     if req.headers['via'] && req.headers['via'].indexOf(user_agent) != -1
       return four_oh_four(resp, "Requesting from self")
 
-    if url.pathname? && dest_url
+    if url.pathname? && dest_url && shared_key
       hmac = Crypto.createHmac("sha1", shared_key)
 
       try
@@ -261,6 +265,9 @@ server = Http.createServer (req, resp) ->
         process_url url, transferredHeaders, resp, max_redirects
       else
         four_oh_four(resp, "checksum mismatch #{hmac_digest}:#{query_digest}")
+    else if '*' in allowed_referers or req.headers.referer in allowed_referers
+      url = Url.parse dest_url
+      process_url url, transferredHeaders, resp, max_redirects
     else
       four_oh_four(resp, "No pathname provided on the server")
 

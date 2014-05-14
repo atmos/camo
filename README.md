@@ -26,8 +26,9 @@ At GitHub we render markdown and replace all of the `src` attributes on the `img
 
 Camo supports two distinct URL formats:
 
-    http://example.org/<digest>?url=<image-url>
+    http://example.org/<digest>?url=<image-url>    
     http://example.org/<digest>/<image-url>
+    http://example.org/?url=<image-url>
 
 The `<digest>` is a 40 character hex encoded HMAC digest generated with a shared
 secret key and the unescaped `<image-url>` value. The `<image-url>` is the
@@ -35,6 +36,8 @@ absolute URL locating an image. In the first format, the `<image-url>` should be
 URL escaped aggressively to ensure the original value isn't mangled in transit.
 In the second format, each byte of the `<image-url>` should be hex encoded such
 that the resulting value includes only characters `[0-9a-f]`.
+
+`<digest>` can be left out of the URL if `CAMO_ALLOWED_REFERERS` is set.
 
 ## Configuration
 
@@ -48,6 +51,7 @@ Camo is configured through environment variables.
 * `CAMO_MAX_REDIRECTS`: The maximum number of redirects Camo will follow while fetching an image. (default: 4)
 * `CAMO_SOCKET_TIMEOUT`: The maximum number of seconds Camo will wait before giving up on fetching an image. (default: 10)
 * `CAMO_TIMING_ALLOW_ORIGIN`: The string for Camo to include in the [`Timing-Allow-Origin` header](http://www.w3.org/TR/resource-timing/#cross-origin-resources) it sends in responses to clients. The header is omitted if this environment variable is not set. (default: not set)
+* `CAMO_ALLOWED_REFERERS`: An optional comma-separated string of referers that are allowed without specifying the `<digest>` without knowing `CAMO_KEY`.
 
 ## Testing Functionality
 
@@ -57,7 +61,7 @@ Camo is configured through environment variables.
 
 ### Start the server
 
-    % coffee server.coffee
+    % CAMO_KEY=0x24FEEDFACEDEADBEEFCAFE coffee server.coffee
 
 ### In another shell
 
