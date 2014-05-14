@@ -193,7 +193,7 @@ module CamoProxyTests
   end
 
   def test_follows_temporary_redirects
-    response = request('http://d.pr/i/rr7F+')
+    response = request('http://bit.ly/1l9Fztb')
     assert_equal(200, response.code)
   end
 
