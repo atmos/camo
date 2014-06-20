@@ -5,17 +5,25 @@ Http        = require 'http'
 Https       = require 'https'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+stream      = require 'stream'
+zlib        = require 'zlib'
+mmm         = null
 
-port            = parseInt process.env.PORT        || 8081, 10
-version         = require(Path.resolve(__dirname, "package.json")).version
-shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
-max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
-camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
-socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
-logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
+port                             = parseInt process.env.PORT                          || 8081, 10
+version                          = require(Path.resolve(__dirname, "package.json")).version
+shared_key                       = process.env.CAMO_KEY                               || '0x24FEEDFACEDEADBEEFCAFE'
+max_redirects                    = process.env.CAMO_MAX_REDIRECTS                     || 4
+camo_hostname                    = process.env.CAMO_HOSTNAME                          || "unknown"
+socket_timeout                   = process.env.CAMO_SOCKET_TIMEOUT                    || 10
+logging_enabled                  = process.env.CAMO_LOGGING_ENABLED                   || "disabled"
+keep_alive                       = process.env.CAMO_KEEP_ALIVE                        || "false"
+detect_content_type              = process.env.CAMO_DETECT_CONTENT_TYPE               || "disabled"
+detect_content_type_buffer_size  = process.env.CAMO_DETECT_CONTENT_TYPE_BUFFER_SIZE   || 100
+content_length_limit             = parseInt(process.env.CAMO_LENGTH_LIMIT             || 5242880, 10)
 
-content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
+if detect_content_type == "enabled"
+  mmmagic = require 'mmmagic'
+  mmm = new mmmagic.Magic(mmmagic.MAGIC_MIME)
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
   Path.resolve(__dirname, "mime-types.json"),
@@ -139,22 +147,81 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           when 200
             contentType = newHeaders['content-type']
 
-            unless contentType?
-              srcResp.destroy()
-              four_oh_four(resp, "No content-type returned", url)
-              return
+            # Need to use buffers since the data may be binary
+            dataRead = new Buffer(0)
 
-            contentTypePrefix = contentType.split(";")[0]
+            decodeStream = (chunk) ->
+              dataRead = Buffer.concat [dataRead, chunk]
+              decoder.write chunk
 
-            unless contentTypePrefix in accepted_image_mime_types
-              srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
-              return
+            sendResponse = (contentType, srcResp, resp, url, decodeStream) ->
 
-            debug_log newHeaders
+              unless contentType?
+                srcResp.destroy()
+                four_oh_four(resp, "No content-type returned", url)
+                return
 
-            resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.pipe resp
+              contentTypePrefix = contentType.split(";")[0]
+
+              unless contentTypePrefix in accepted_image_mime_types
+                srcResp.destroy()
+                four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
+                return
+
+              newHeaders['content-type'] = contentType
+              debug_log newHeaders
+
+              resp.writeHead srcResp.statusCode, newHeaders
+
+              srcResp.removeListener 'data', decodeStream
+              srcResp.resume()
+              srcResp.pipe resp
+
+            if mmm
+              debug_log "Auto-detecting content type"
+
+              decoder = new stream.PassThrough()
+              switch srcResp.headers['content-encoding']
+                when 'gzip'
+                  debug_log "Using gzip decoder"
+                  decoder = zlib.createGunzip()
+                when 'deflate'
+                  debug_log "Using deflate decoder"
+                  decoder = zlib.createInflate()
+                else
+                  debug_log "Using no-op decoder"
+
+              # Optimistically detect the content type from the first decoded chunk of data
+              detectContentType = (chunk) ->
+                # Need to pause the srcResp so the decodeStream data handler is not called
+                srcResp.pause()
+
+                decoder.end()
+
+                srcResp.unshift(dataRead)
+
+                debug_log "Detecting for chunk"
+                mmm.detect chunk, (err, result) ->
+                  if err
+                    error_log "Error detecting content type from first decoded data chunk for url: " + url
+                    error_log err
+                  else
+                    detectedContentType = result
+
+                  debug_log 'Given content-type: "' + contentType + '" detected content-type: "' + detectedContentType + '"'
+
+                  if detectedContentType
+                    sendResponse detectedContentType, srcResp, resp, url, decodeStream
+                  else
+                    sendResponse contentType, srcResp, resp, url, decodeStream
+
+              decoder.once 'data', detectContentType
+
+              srcResp.on 'data', decodeStream
+
+            else
+              sendResponse contentType, srcResp, resp, url, decodeStream
+
           when 301, 302, 303, 307
             srcResp.destroy()
             if remaining_redirects <= 0

@@ -2,6 +2,7 @@
   "name": "camo",
   "version": "2.2.0",
   "dependencies": {
+      "mmmagic": "^0.3.8"
   },
   "engines": {
     "node": "^0.10.29"
