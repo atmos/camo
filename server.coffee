@@ -190,8 +190,8 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   else
     four_oh_four(resp, "No host found " + url.host, url)
 
-# decode a string of two char hex digits
-hexdec = (str) ->
+# decode a string of two char hex digits to a binary buffer
+hex2bytes = (str) ->
   if str and str.length > 0 and str.length % 2 == 0 and not str.match(/[^0-9a-f]/)
     buf = new Buffer(str.length / 2)
     for i in [0...str.length] by 2
@@ -227,7 +227,7 @@ server = Http.createServer (req, resp) ->
     delete(req.headers.cookie)
 
     [query_digest, encoded_url] = url.pathname.replace(/^\//, '').split("/", 2)
-    if encoded_url = hexdec(encoded_url)
+    if encoded_url = hex2bytes(encoded_url)
       url_type = 'path'
       dest_url = encoded_url
     else
