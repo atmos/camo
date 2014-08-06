@@ -15,7 +15,6 @@
   "success_url": "/stats",
 
   "env": {
-    "BUILDPACK_URL": "https://github.com/ddollar/heroku-buildpack-multi.git",
     "CAMO_HOSTNAME": {
       "description": "Unique key for this environment to sign urls with.",
       "generator": "secret"
