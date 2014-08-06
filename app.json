@@ -16,7 +16,6 @@
 
   "env": {
     "BUILDPACK_URL": "https://github.com/ddollar/heroku-buildpack-multi.git",
-    "RAILS_ENV": "production",
     "CAMO_HOSTNAME": {
       "description": "Unique key for this environment to sign urls with.",
       "generator": "secret"
@@ -40,6 +39,10 @@
     "CAMO_SOCKET_TIMEOUT": {
       "description": "The number of seconds to wait for socket connection errors",
       "value": "10"
+    },
+    "RAILS_ENV": {
+      "description": "The RAILS environment for this installation",
+      "value": "production"
     }
   },
 
