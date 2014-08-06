@@ -1,0 +1,49 @@
+{
+  "name": "camo",
+  "description": "Camo is all about making insecure image assets look secure.",
+
+  "keywords": [
+    "ssl",
+    "image",
+    "proxy",
+    "github",
+    "anonymous"
+  ],
+
+  "website": "http://github.com/atmos/camo",
+  "repository": "https://github.com/atmos/camo",
+  "success_url": "/stats",
+
+  "env": {
+    "BUILDPACK_URL": "https://github.com/ddollar/heroku-buildpack-multi.git",
+    "RAILS_ENV": "production",
+    "CAMO_HOSTNAME": {
+      "description": "Unique key for this environment to sign urls with.",
+      "generator": "secret"
+    },
+    "CAMO_KEY": {
+      "description": "The fully qualified domain name for camo to run on.",
+      "required": true
+    },
+    "CAMO_LENGTH_LIMIT": {
+      "description": "The maximum Content-Length that camo will proxy in bytes",
+      "value": "5242880",
+      "required": true
+    },
+    "CAMO_LOGGING_ENABLED": {
+      "description": "Toggle whether or not to log verbosely('debug' or disabled')."
+    },
+    "CAMO_MAX_REDIRECTS": {
+      "description": "The number of redirects that camo should follow",
+      "value": "4"
+    },
+    "CAMO_SOCKET_TIMEOUT": {
+      "description": "The number of seconds to wait for socket connection errors",
+      "value": "10"
+    }
+  },
+
+  "scripts": {
+    "postdeploy": "bundle exec rake db:migrate"
+  }
+}
