@@ -16,11 +16,11 @@
 
   "env": {
     "CAMO_HOSTNAME": {
-      "description": "Unique key for this environment to sign urls with.",
-      "generator": "secret"
+      "description": "Unique key for this environment to sign urls with."
     },
     "CAMO_KEY": {
       "description": "The fully qualified domain name for camo to run on.",
+      "generator": "secret"
       "required": true
     },
     "CAMO_LENGTH_LIMIT": {
