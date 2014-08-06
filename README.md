@@ -12,7 +12,7 @@ Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org
 
 Camo currently runs on node version 0.10.26 at GitHub on [heroku](http://heroku.com).
 
-[![Launch on Heroku](https://www.herokucdn.com/deploy/button.png)](https://www.heroku.com/deploy/?template=https://github.com/atmos/camo)
+[![Launch on Heroku](https://www.herokucdn.com/deploy/button.png)](https://dashboard-next.heroku.com/new?template=https://github.com/atmos/camo)
 
 Features
 --------
