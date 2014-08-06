@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/atmos/camo.svg?branch=master)](https://travis-ci.org/atmos/camo)
+# camo [![Build Status](https://travis-ci.org/atmos/camo.svg?branch=master)](https://travis-ci.org/atmos/camo)
 
 Camo is all about making insecure assets look secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [GitHub](https://github.com).
 
@@ -11,6 +11,8 @@ We want to allow people to keep embedding images in comments/issues/READMEs.
 Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
 Camo currently runs on node version 0.10.26 at GitHub on [heroku](http://heroku.com).
+
+[![Launch on Heroku](https://www.herokucdn.com/deploy/button.png)](https://www.heroku.com/deploy/?template=https://github.com/atmos/camo)
 
 Features
 --------
