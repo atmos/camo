@@ -17,12 +17,11 @@
 
   "env": {
     "CAMO_HOSTNAME": {
-      "description": "Unique key for this environment to sign urls with."
+      "description": "The hostname for the camo server."
     },
     "CAMO_KEY": {
       "description": "The fully qualified domain name for camo to run on.",
-      "generator": "secret",
-      "required": true
+      "generator": "secret"
     },
     "CAMO_LENGTH_LIMIT": {
       "description": "The maximum Content-Length that camo will proxy in bytes",
