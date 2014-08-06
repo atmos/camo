@@ -20,7 +20,7 @@
     },
     "CAMO_KEY": {
       "description": "The fully qualified domain name for camo to run on.",
-      "generator": "secret"
+      "generator": "secret",
       "required": true
     },
     "CAMO_LENGTH_LIMIT": {
