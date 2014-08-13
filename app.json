@@ -43,9 +43,5 @@
       "description": "The RAILS environment for this installation",
       "value": "production"
     }
-  },
-
-  "scripts": {
-    "postdeploy": "bundle exec rake db:migrate"
   }
 }
