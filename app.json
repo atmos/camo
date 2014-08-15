@@ -13,7 +13,7 @@
 
   "website": "http://github.com/atmos/camo",
   "repository": "https://github.com/atmos/camo",
-  "success_url": "/stats",
+  "success_url": "/status",
 
   "env": {
     "CAMO_HOSTNAME": {
