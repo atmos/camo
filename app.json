@@ -17,7 +17,8 @@
 
   "env": {
     "CAMO_HOSTNAME": {
-      "description": "The hostname for the camo server."
+      "description": "The hostname for the camo server.",
+      "required": false
     },
     "CAMO_KEY": {
       "description": "The fully qualified domain name for camo to run on.",
@@ -25,11 +26,11 @@
     },
     "CAMO_LENGTH_LIMIT": {
       "description": "The maximum Content-Length that camo will proxy in bytes",
-      "value": "5242880",
-      "required": true
+      "value": "5242880"
     },
     "CAMO_LOGGING_ENABLED": {
-      "description": "Toggle whether or not to log verbosely('debug' or disabled')."
+      "description": "Toggle whether or not to log verbosely('debug' or disabled').",
+      "required": false
     },
     "CAMO_MAX_REDIRECTS": {
       "description": "The number of redirects that camo should follow",
@@ -38,10 +39,6 @@
     "CAMO_SOCKET_TIMEOUT": {
       "description": "The number of seconds to wait for socket connection errors",
       "value": "10"
-    },
-    "RAILS_ENV": {
-      "description": "The RAILS environment for this installation",
-      "value": "production"
     }
   }
 }
