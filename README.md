@@ -38,6 +38,27 @@ URL escaped aggressively to ensure the original value isn't mangled in transit.
 In the second format, each byte of the `<image-url>` should be hex encoded such
 that the resulting value includes only characters `[0-9a-f]`.
 
+### Generating image URLs in Ruby
+
+```ruby
+require 'uri'
+require 'openssl'
+
+digest = OpenSSL::Digest.new('sha1')
+host = "https://sample-app-name.herokuapp.com"
+secret = "MySharedSecretKey"
+
+image_url = "http://a1.dspnimg.com/data/l/1099218875447_anbzQlVe_l.jpg"
+encoded_image_url = URI.encode_www_form_component(image_url)
+
+hexdigest = OpenSSL::HMAC.hexdigest(digest, secret, image_url)
+
+uri = URI.parse("#{host}/#{hexdigest}")
+uri.query = "url=#{encoded_image_url}"
+
+puts uri.to_s  # => "https://sample-app-name.herokuapp.com/eb56b6821137216907731f1ddbd4d9fa0ee88e14?url=http%3A%2F%2Fa1.dspnimg.com%2Fdata%2Fl%2F1099218875447_anbzQlVe_l.jpg"
+```
+
 ## Configuration
 
 Camo is configured through environment variables.
