@@ -10,7 +10,7 @@ We want to allow people to keep embedding images in comments/issues/READMEs.
 
 Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
-Camo currently runs on node version 0.10.26 at GitHub on [heroku](http://heroku.com).
+Camo currently runs on node version 0.10.29 at GitHub on [heroku](http://heroku.com).
 
 [![Launch on Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/atmos/camo)
 
@@ -50,6 +50,7 @@ Camo is configured through environment variables.
 * `CAMO_MAX_REDIRECTS`: The maximum number of redirects Camo will follow while fetching an image. (default: 4)
 * `CAMO_SOCKET_TIMEOUT`: The maximum number of seconds Camo will wait before giving up on fetching an image. (default: 10)
 * `CAMO_TIMING_ALLOW_ORIGIN`: The string for Camo to include in the [`Timing-Allow-Origin` header](http://www.w3.org/TR/resource-timing/#cross-origin-resources) it sends in responses to clients. The header is omitted if this environment variable is not set. (default: not set)
+* `CAMO_HOSTNAME`: The `Camo-Host` header value that Camo will send. (default: `unknown`)
 
 ## Testing Functionality
 
