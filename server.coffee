@@ -14,6 +14,8 @@ max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
+keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
+
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
@@ -82,6 +84,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       port: url.port
       path: queryPath
       headers: transferredHeaders
+
+    if keep_alive == "false"
+      requestOptions['agent'] = false
 
     srcReq = Protocol.get requestOptions, (srcResp) ->
       is_finished = true
