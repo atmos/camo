@@ -9,8 +9,6 @@
 
   Url = require('url');
 
-  Path = require('path');
-
   Http = require('http');
 
   Https = require('https');
