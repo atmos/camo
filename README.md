@@ -52,6 +52,7 @@ Camo is configured through environment variables.
 * `CAMO_TIMING_ALLOW_ORIGIN`: The string for Camo to include in the [`Timing-Allow-Origin` header](http://www.w3.org/TR/resource-timing/#cross-origin-resources) it sends in responses to clients. The header is omitted if this environment variable is not set. (default: not set)
 * `CAMO_HOSTNAME`: The `Camo-Host` header value that Camo will send. (default: `unknown`)
 * `CAMO_KEEP_ALIVE`: Whether or not to enable keep-alive session. (default: `false`)
+* `CAMO_DETECT_CONTENT_TYPE`: Set to `enabled` to automatically detect the content type from the response. Relies on the `mmmagic` module. (default: `disabled`)
 
 ## Testing Functionality
 
