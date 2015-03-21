@@ -142,6 +142,17 @@ module CamoProxyTests
     end
   end
 
+  def test_forwards_404_with_image
+    spawn_server(:not_found) do |host|
+      response = RestClient.get(request_uri("http://#{host}/octocat.jpg")) do |response, request, result|
+        # don't raise on 404
+        response
+      end
+      assert_equal(404, response.code)
+      assert_equal("image/jpeg", response.headers[:content_type])
+    end
+  end
+
   def test_404s_on_request_error
     spawn_server(:crash_request) do |host|
       assert_raise RestClient::ResourceNotFound do
