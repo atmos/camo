@@ -20,7 +20,7 @@ Features
 * Max size for proxied images
 * Follow redirects to a certain depth
 * Restricts proxied images content-types to a whitelist
-* Forward images regardless HTTP status code
+* Forward images regardless of HTTP status code
 
 At GitHub we render markdown and replace all of the `src` attributes on the `img` tags with the appropriate URL to hit the proxies.  There's example code for creating URLs in [the tests](https://github.com/atmos/camo/blob/master/test/proxy_test.rb).
 
