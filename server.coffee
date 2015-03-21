@@ -136,25 +136,6 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
             finish resp
 
         switch srcResp.statusCode
-          when 200
-            contentType = newHeaders['content-type']
-
-            unless contentType?
-              srcResp.destroy()
-              four_oh_four(resp, "No content-type returned", url)
-              return
-
-            contentTypePrefix = contentType.split(";")[0]
-
-            unless contentTypePrefix in accepted_image_mime_types
-              srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
-              return
-
-            debug_log newHeaders
-
-            resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.pipe resp
           when 301, 302, 303, 307
             srcResp.destroy()
             if remaining_redirects <= 0
@@ -174,8 +155,24 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
             srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
           else
-            srcResp.destroy()
-            four_oh_four(resp, "Origin responded with #{srcResp.statusCode}", url)
+            contentType = newHeaders['content-type']
+
+            unless contentType?
+              srcResp.destroy()
+              four_oh_four(resp, "No content-type returned", url)
+              return
+
+            contentTypePrefix = contentType.split(";")[0]
+
+            unless contentTypePrefix in accepted_image_mime_types
+              srcResp.destroy()
+              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
+              return
+
+            debug_log newHeaders
+
+            resp.writeHead srcResp.statusCode, newHeaders
+            srcResp.pipe resp
 
     srcReq.setTimeout (socket_timeout * 1000), ->
       srcReq.abort()
