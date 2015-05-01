@@ -162,7 +162,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
               four_oh_four(resp, "No content-type returned", url)
               return
 
-            contentTypePrefix = contentType.split(";")[0]
+            contentTypePrefix = contentType.split(";")[0].toLowerCase()
 
             unless contentTypePrefix in accepted_image_mime_types
               srcResp.destroy()
