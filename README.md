@@ -81,3 +81,7 @@ To enable useful line numbers in stacktraces you probably want to compile the se
 
     % coffee -c server.coffee
     % /usr/bin/env PORT=9090 CAMO_KEY="<my application key>" node server.js
+
+## Examples
+* Ruby - https://github.com/ankane/camo
+* PHP - https://github.com/willwashburn/Phpamo
