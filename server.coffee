@@ -9,6 +9,7 @@ QueryString = require 'querystring'
 port            = parseInt process.env.PORT        || 8081, 10
 version         = require(Path.resolve(__dirname, "package.json")).version
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
+hash_name       = process.env.CAMO_HASH            || 'sha1'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
@@ -247,7 +248,7 @@ server = Http.createServer (req, resp) ->
       return four_oh_four(resp, "Requesting from self")
 
     if url.pathname? && dest_url
-      hmac = Crypto.createHmac("sha1", shared_key)
+      hmac = Crypto.createHmac(hash_name, shared_key)
 
       try
         hmac.update(dest_url, 'utf8')
