@@ -219,7 +219,7 @@ server = Http.createServer (req, resp) ->
       'Via'                     : user_agent
       'User-Agent'              : user_agent
       'Accept'                  : req.headers.accept ? 'image/*'
-      'Accept-Encoding'         : req.headers['accept-encoding']
+      'Accept-Encoding'         : req.headers['accept-encoding'] ? ''
       "X-Frame-Options"         : default_security_headers["X-Frame-Options"]
       "X-XSS-Protection"        : default_security_headers["X-XSS-Protection"]
       "X-Content-Type-Options"  : default_security_headers["X-Content-Type-Options"]

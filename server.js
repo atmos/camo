@@ -259,7 +259,7 @@
         'Via': user_agent,
         'User-Agent': user_agent,
         'Accept': (ref = req.headers.accept) != null ? ref : 'image/*',
-        'Accept-Encoding': req.headers['accept-encoding'],
+        'Accept-Encoding': (ref = req.headers['accept-encoding']) != undefined ? ref : '' ,
         "X-Frame-Options": default_security_headers["X-Frame-Options"],
         "X-XSS-Protection": default_security_headers["X-XSS-Protection"],
         "X-Content-Type-Options": default_security_headers["X-Content-Type-Options"],
