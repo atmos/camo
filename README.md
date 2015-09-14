@@ -81,3 +81,12 @@ To enable useful line numbers in stacktraces you probably want to compile the se
 
     % coffee -c server.coffee
     % /usr/bin/env PORT=9090 CAMO_KEY="<my application key>" node server.js
+
+### Docker
+
+A `Dockerfile` is included, you can build and run it with:
+
+```bash
+docker build -t camo .
+docker run --env CAMO_KEY=YOUR_KEY -t camo
+```
