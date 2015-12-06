@@ -90,3 +90,7 @@ A `Dockerfile` is included, you can build and run it with:
 docker build -t camo .
 docker run --env CAMO_KEY=YOUR_KEY -t camo
 ```
+
+## Examples
+* Ruby - https://github.com/ankane/camo
+* PHP - https://github.com/willwashburn/Phpamo
