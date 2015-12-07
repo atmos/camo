@@ -120,6 +120,16 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
         if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
           newHeaders['Timing-Allow-Origin'] = origin
 
+        if transferredHeaders["Origin"] && process.env.CAMO_ALLOW_ACCESS_CONTROL
+          allowed_origins = process.env.CAMO_ALLOW_ORIGINS || '*'
+          if allowed_origins == '*'
+            newHeaders['Access-Control-Allow-Origin'] = "*"
+          else if new RegExp(allowed_origins).test(transferredHeaders["Origin"])
+            newHeaders['Access-Control-Allow-Origin'] = transferredHeaders["Origin"];
+            newHeaders['Vary'] = (if newHeaders['Vary'] then newHeaders['Vary'] + ', ' else '') + "Origin"
+          else
+            four_oh_four(resp, "Origin not allowed", url)
+
         # Handle chunked responses properly
         if content_length?
           newHeaders['content-length'] = content_length
@@ -224,6 +234,8 @@ server = Http.createServer (req, resp) ->
       "X-XSS-Protection"        : default_security_headers["X-XSS-Protection"]
       "X-Content-Type-Options"  : default_security_headers["X-Content-Type-Options"]
       "Content-Security-Policy" : default_security_headers["Content-Security-Policy"]
+
+    if req.headers.origin then transferredHeaders["Origin"] = req.headers.origin
 
     delete(req.headers.cookie)
 
