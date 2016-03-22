@@ -5,16 +5,17 @@ Http        = require 'http'
 Https       = require 'https'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+Throng      = require 'throng'
 
-port            = parseInt process.env.PORT        || 8081, 10
-version         = require(Path.resolve(__dirname, "package.json")).version
-shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
-max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
-camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
-socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
-logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
-keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
-
+port                 = parseInt process.env.PORT || 8081, 10
+version              = require(Path.resolve(__dirname, "package.json")).version
+shared_key           = process.env.CAMO_KEY || '0x24FEEDFACEDEADBEEFCAFE'
+max_redirects        = process.env.CAMO_MAX_REDIRECTS || 4
+camo_hostname        = process.env.CAMO_HOSTNAME || "unknown"
+socket_timeout       = process.env.CAMO_SOCKET_TIMEOUT || 10
+logging_enabled      = process.env.CAMO_LOGGING_ENABLED || "disabled"
+keep_alive           = process.env.CAMO_KEEP_ALIVE || "false"
+worker_count         = process.env.WEB_CONCURRENCY || 1
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
@@ -267,4 +268,9 @@ server = Http.createServer (req, resp) ->
 
 console.log "SSL-Proxy running on #{port} with pid:#{process.pid} version:#{version}."
 
-server.listen port
+listen = ->
+  server.listen port
+
+Throng listen,
+  workers: worker_count
+  lifetime: Infinity

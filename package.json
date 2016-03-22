@@ -2,6 +2,7 @@
   "name": "camo",
   "version": "2.3.0",
   "dependencies": {
+    "throng": "^2.0.1"
   },
   "engines": {
     "node": "^0.10.29"
