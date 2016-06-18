@@ -2,7 +2,11 @@ FROM ubuntu
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -yq nodejs npm
+RUN apt-get update && \
+    apt-get install -yq \
+        nodejs \
+        npm && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD package.json /app/
 RUN npm install
