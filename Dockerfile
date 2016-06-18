@@ -1,9 +1,8 @@
 FROM ubuntu
 
-RUN apt-get update && apt-get install -yq nodejs npm
-
-RUN mkdir /app
 WORKDIR /app
+
+RUN apt-get update && apt-get install -yq nodejs npm
 
 ADD package.json /app/
 RUN npm install
