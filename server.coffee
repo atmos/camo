@@ -5,6 +5,8 @@ Http        = require 'http'
 Https       = require 'https'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
+HttpProxyAgent  = require 'http-proxy-agent'
+HttpsProxyAgent = require 'https-proxy-agent'
 
 port            = parseInt process.env.PORT        || 8081, 10
 version         = require(Path.resolve(__dirname, "package.json")).version
@@ -14,6 +16,7 @@ camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
+proxy           = process.env.CAMO_PROXY || ""
 
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
 
@@ -84,9 +87,15 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       path: queryPath
       headers: transferredHeaders
 
-    if keep_alive == "false"
-      requestOptions['agent'] = false
-
+    if proxy
+      if url.protocol is 'https:'
+        proxyAgent = new HttpsProxyAgent(proxy)
+      else if url.protocol is 'http:'
+        proxyAgent = new HttpProxyAgent(proxy)
+      requestOptions['agent'] = proxyAgent
+    else
+      if keep_alive == "false"
+        requestOptions['agent'] = false
     srcReq = Protocol.get requestOptions, (srcResp) ->
       is_finished = true
 
