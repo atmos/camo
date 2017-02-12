@@ -2,3 +2,8 @@ node_modules
 tmp/camouflage.pid
 tmp/camo.pid
 .node-version
+.idea/.rakeTasks
+.idea/camo.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml

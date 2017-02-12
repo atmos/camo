@@ -227,6 +227,7 @@ server = Http.createServer (req, resp) ->
     # through the proxy.  So the only option we have left is to use the image proxy to strip out the
     # 'image/webp,' from the 'Accept' header so we stop using webp through the image proxy altogether.
     # Some relevant links:
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation/List_of_default_Accept_values
     # https://support.cloudflare.com/hc/en-us/articles/217343117-What-headers-can-I-vary-the-cache-on-
     # http://stackoverflow.com/questions/37629854/impossible-to-serve-webp-images-using-cloudflare
     # https://xenforo.com/community/threads/getting-proxy-images-to-work-well-with-cloudflare-compression-polish.105817/
