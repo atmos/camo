@@ -215,10 +215,31 @@ server = Http.createServer (req, resp) ->
     url = Url.parse req.url
     user_agent = process.env.CAMO_HEADER_VIA or= "Camo Asset Proxy #{version}"
 
+    # QUANTOPIAN CHANGED: We added the if block below to strip out 'image/webp,' from
+    # the transferred 'Accept' header.  Only Chrome can handle webp currently, so if Cloudflare
+    # caches  the webp version of an image, which happens if Chrome is the first type of browser
+    # to request a particular gravatar image, that image appears broken for non-Chrome browsers.
+    # Ideally Cloudflare would just store a copy of the image for each content type, but unfortunately
+    # it only supports varying the cache based on the 'Accept-Encoding' header (and we would
+    # need it to vary the cache based on the 'Accept' header or the content type of the file).
+    # It initially seemed like Cloudflare's new image compression offering Polish would do the right thing for
+    # us, but it requires our images to have extensions on them, which they don't when being served
+    # through the proxy.  So the only option we have left is to use the image proxy to strip out the
+    # 'image/webp,' from the 'Accept' header so we stop using webp through the image proxy altogether.
+    # Some relevant links:
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation/List_of_default_Accept_values
+    # https://support.cloudflare.com/hc/en-us/articles/217343117-What-headers-can-I-vary-the-cache-on-
+    # http://stackoverflow.com/questions/37629854/impossible-to-serve-webp-images-using-cloudflare
+    # https://xenforo.com/community/threads/getting-proxy-images-to-work-well-with-cloudflare-compression-polish.105817/
+    if req.headers.accept?
+      transferred_accept_header = req.headers.accept.replace(/image\/webp,/, '')
+    else
+      transferred_accept_header = 'image/*'
+
     transferredHeaders =
       'Via'                     : user_agent
       'User-Agent'              : user_agent
-      'Accept'                  : req.headers.accept ? 'image/*'
+      'Accept'                  : transferred_accept_header
       'Accept-Encoding'         : req.headers['accept-encoding'] ? ''
       "X-Frame-Options"         : default_security_headers["X-Frame-Options"]
       "X-XSS-Protection"        : default_security_headers["X-XSS-Protection"]
@@ -239,6 +260,7 @@ server = Http.createServer (req, resp) ->
       type:     url_type
       url:      req.url
       headers:  req.headers
+      transferred_accept_header: transferred_accept_header
       dest:     dest_url
       digest:   query_digest
     })
