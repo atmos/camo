@@ -105,6 +105,22 @@ module CamoProxyTests
     end
   end
 
+  # QUANTOPIAN CHANGED - added the test below.  Try getting the avatar placeholder image
+  # via gravatar, and pass in the same 'accept' header that Chrome would pass in, including
+  # 'image/webp'.  Due to our changes in server.coffee, this should result in a png image
+  # being returned rather than a webp image.
+  def test_webp_disabled
+    response = RestClient.get(
+      request_uri(
+        'https://secure.gravatar.com/avatar/4ab6a20594384864adae340b6abfb65b?' \
+        'default=https%3A%2F%2Fs3.amazonaws.com%2Fquantopian-website-assets%2Fempty-profile.png&s=40'
+      ),
+      {accept: 'image/webp,image/*,*/*;q=0.8'}
+    )
+    assert_equal(200, response.code)
+    assert_equal('image/png', response.headers[:content_type])
+  end
+
   def test_proxy_valid_google_chart_url
     response = request('http://chart.apis.google.com/chart?chs=920x200&chxl=0:%7C2010-08-13%7C2010-09-12%7C2010-10-12%7C2010-11-11%7C1:%7C0%7C0%7C0%7C0%7C0%7C0&chm=B,EBF5FB,0,0,0&chco=008Cd6&chls=3,1,0&chg=8.3,20,1,4&chd=s:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&chxt=x,y&cht=lc')
     assert_equal(200, response.code)

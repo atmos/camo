@@ -218,8 +218,8 @@ server = Http.createServer (req, resp) ->
     # QUANTOPIAN CHANGED: We added the if block below to strip out 'image/webp,' from
     # the transferred 'Accept' header.  Only Chrome can handle webp currently, so if Cloudflare
     # caches  the webp version of an image, which happens if Chrome is the first type of browser
-    # to request a particular image, that image appears broken for non-Chrome browsers.  Ideally
-    # Cloudflare would just store a copy of the image for each content type, but unfortunately
+    # to request a particular gravatar image, that image appears broken for non-Chrome browsers.
+    # Ideally Cloudflare would just store a copy of the image for each content type, but unfortunately
     # it only supports varying the cache based on the 'Accept-Encoding' header (and we would
     # need it to vary the cache based on the 'Accept' header or the content type of the file).
     # It initially seemed like Cloudflare's new image compression offering Polish would do the right thing for
