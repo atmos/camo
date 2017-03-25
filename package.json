@@ -2,6 +2,8 @@
   "name": "camo",
   "version": "2.3.0",
   "dependencies": {
+    "http-proxy-agent": "*",
+    "https-proxy-agent": "*"
   },
   "engines": {
     "node": "^0.10.29"
