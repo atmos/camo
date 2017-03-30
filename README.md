@@ -2,7 +2,7 @@
 
 Camo is all about making insecure assets look secure.  This is an SSL image proxy to prevent mixed content warnings on secure pages served from [GitHub](https://github.com).
 
-![camo](https://f.cloud.github.com/assets/38/2496172/f558bbb4-b312-11e3-88e9-646b77e47e6e.gif)
+![camo](https://cloud.githubusercontent.com/assets/38/24514552/88f29edc-1529-11e7-832f-6d2942144c87.gif)
 
 We want to allow people to keep embedding images in comments/issues/READMEs.
 
