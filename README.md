@@ -21,6 +21,7 @@ Features
 * Follow redirects to a certain depth
 * Restricts proxied images content-types to a whitelist
 * Forward images regardless of HTTP status code
+* Support for CORS (Access-Control-Allow-Origin & Vary headers)
 
 At GitHub we render markdown and replace all of the `src` attributes on the `img` tags with the appropriate URL to hit the proxies.  There's example code for creating URLs in [the tests](https://github.com/atmos/camo/blob/master/test/proxy_test.rb).
 
@@ -52,6 +53,8 @@ Camo is configured through environment variables.
 * `CAMO_TIMING_ALLOW_ORIGIN`: The string for Camo to include in the [`Timing-Allow-Origin` header](http://www.w3.org/TR/resource-timing/#cross-origin-resources) it sends in responses to clients. The header is omitted if this environment variable is not set. (default: not set)
 * `CAMO_HOSTNAME`: The `Camo-Host` header value that Camo will send. (default: `unknown`)
 * `CAMO_KEEP_ALIVE`: Whether or not to enable keep-alive session. (default: `false`)
+* `CAMO_ALLOW_ACCESS_CONTROL`: Whether or not to enable CORS via Access-Control-Allow-Origin header. (default: `false`)
+* `CAMO_ALLOW_ORIGINS`: A regex of allowed origins to match against. Use a wildcard ('*') to enable all origins. (default: `*`)
 
 ## Testing Functionality
 
