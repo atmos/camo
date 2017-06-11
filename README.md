@@ -8,7 +8,7 @@ We want to allow people to keep embedding images in comments/issues/READMEs.
 
 [There's more info on the GitHub blog](https://github.com/blog/743-sidejack-prevention-phase-3-ssl-proxied-assets).
 
-Using a shared key, proxy URLs are encrypted with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
+Using a shared key, proxy URLs are authenticated with [hmac](http://en.wikipedia.org/wiki/HMAC) so we can bust caches/ban/rate limit if needed.
 
 Camo currently runs on node version 0.10.29 at GitHub on [heroku](http://heroku.com).
 
