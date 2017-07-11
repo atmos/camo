@@ -44,7 +44,7 @@ Camo is configured through environment variables.
 
 * `PORT`: The port number Camo should listen on. (default: 8081)
 * `CAMO_HEADER_VIA`: The string for Camo to include in the `Via` and `User-Agent` headers it sends in requests to origin servers. (default: `Camo Asset Proxy <version>`)
-* `CAMO_KEY`: The shared key used to generate the HMAC digest.
+* `CAMO_KEY`: A shared key consisting of a random string, used to generate the HMAC digest.
 * `CAMO_LENGTH_LIMIT`: The maximum `Content-Length` Camo will proxy. (default: 5242880)
 * `CAMO_LOGGING_ENABLED`: The logging level used for reporting debug or error information. Options are `debug` and `disabled`. (default: `disabled`)
 * `CAMO_MAX_REDIRECTS`: The maximum number of redirects Camo will follow while fetching an image. (default: 4)
