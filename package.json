@@ -1,9 +1,11 @@
 {
   "name": "camo",
   "version": "2.3.0",
-  "dependencies": {
-  },
+  "dependencies": {},
   "engines": {
     "node": "^0.10.29"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.12.6"
   }
 }
