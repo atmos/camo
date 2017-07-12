@@ -4,6 +4,6 @@
   "dependencies": {
   },
   "engines": {
-    "node": "^0.10.29"
+    "node": "8.1.4"
   }
 }
