@@ -1,6 +1,4 @@
-FROM ubuntu
-
-RUN apt-get update && apt-get install -yq nodejs npm
+FROM node:8.4
 
 RUN mkdir /app
 WORKDIR /app
