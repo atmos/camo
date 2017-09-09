@@ -94,3 +94,4 @@ docker run --env CAMO_KEY=YOUR_KEY -t camo
 ## Examples
 * Ruby - https://github.com/ankane/camo
 * PHP - https://github.com/willwashburn/Phpamo
+* Node.js - https://github.com/pine/node-camo-url
