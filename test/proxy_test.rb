@@ -53,7 +53,7 @@ module CamoProxyTests
   end
 
   def test_follows_https_redirect_for_image_links
-    response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
+    response = request('https://user-images.githubusercontent.com/38/30243591-b332eb8a-9561-11e7-8b8c-cad1fe0c821c.jpg')
     assert_equal(200, response.code)
   end
 
@@ -72,7 +72,7 @@ module CamoProxyTests
       assert_equal "max-age=31536000; includeSubDomains", response.headers[:strict_transport_security]
     end
 
-    response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
+    response = request('https://user-images.githubusercontent.com/38/30243591-b332eb8a-9561-11e7-8b8c-cad1fe0c821c.jpg')
     assert_equal "deny", response.headers[:x_frame_options]
     assert_equal "default-src 'none'; img-src data:; style-src 'unsafe-inline'", response.headers[:content_security_policy]
     assert_equal "nosniff", response.headers[:x_content_type_options]
