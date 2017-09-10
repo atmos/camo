@@ -42,7 +42,7 @@ that the resulting value includes only characters `[0-9a-f]`.
 
 Camo is configured through environment variables.
 
-* `PORT`: The port number Camo should listen on. (default: 8081)
+* `CAMO_PORT`: The port number Camo should listen on. (default: 8081)
 * `CAMO_HEADER_VIA`: The string for Camo to include in the `Via` and `User-Agent` headers it sends in requests to origin servers. (default: `Camo Asset Proxy <version>`)
 * `CAMO_KEY`: A shared key consisting of a random string, used to generate the HMAC digest.
 * `CAMO_LENGTH_LIMIT`: The maximum `Content-Length` Camo will proxy. (default: 5242880)
