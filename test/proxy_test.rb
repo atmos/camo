@@ -53,7 +53,7 @@ module CamoProxyTests
   end
 
   def test_follows_https_redirect_for_image_links
-    response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
+    response = request('https://user-images.githubusercontent.com/38/30243591-b332eb8a-9561-11e7-8b8c-cad1fe0c821c.jpg')
     assert_equal(200, response.code)
   end
 
@@ -72,7 +72,7 @@ module CamoProxyTests
       assert_equal "max-age=31536000; includeSubDomains", response.headers[:strict_transport_security]
     end
 
-    response = request('http://dl.dropbox.com/u/602885/github/soldier-squirrel.jpg')
+    response = request('https://user-images.githubusercontent.com/38/30243591-b332eb8a-9561-11e7-8b8c-cad1fe0c821c.jpg')
     assert_equal "deny", response.headers[:x_frame_options]
     assert_equal "default-src 'none'; img-src data:; style-src 'unsafe-inline'", response.headers[:content_security_policy]
     assert_equal "nosniff", response.headers[:x_content_type_options]
@@ -89,13 +89,8 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
-  def test_png_image_with_delimited_content_type_url
-    response = request('http://uploadir.com/u/cm5el1v7')
-    assert_equal(200, response.code)
-  end
-
   def test_proxy_valid_image_url_with_crazy_subdomain
-    response = request('http://27.media.tumblr.com/tumblr_lkp6rdDfRi1qce6mto1_500.jpg')
+    response = request('http://68.media.tumblr.com/c5834ed541c6f7dd760006b05754d4cf/tumblr_osr3veEPRj1uzkitwo1_1280.jpg')
     assert_equal(200, response.code)
   end
 
@@ -111,7 +106,7 @@ module CamoProxyTests
   end
 
   def test_proxy_valid_chunked_image_file
-    response = request('http://www.igvita.com/posts/12/spdyproxy-diagram.png')
+    response = request('https://www.httpwatch.com/httpgallery/chunked/chunkedimage.aspx')
     assert_equal(200, response.code)
     assert_nil(response.headers[:content_length])
   end
@@ -127,18 +122,13 @@ module CamoProxyTests
   end
 
   def test_follows_redirects
-    response = request('http://cl.ly/1K0X2Y2F1P0o3z140p0d/boom-headshot.gif')
-    assert_equal(200, response.code)
-  end
-
-  def test_follows_redirects_formatted_strangely
-    response = request('http://cl.ly/DPcp/Screen%20Shot%202012-01-17%20at%203.42.32%20PM.png')
+    response = request('https://httpbin.org/redirect-to?status_code=301&url=https%3A%2F%2Fhttpbin.org%2Fimage%2Fjpeg')
     assert_equal(200, response.code)
   end
 
   def test_follows_redirects_with_path_only_location_headers
     assert_nothing_raised do
-      request('http://blogs.msdn.com/photos/noahric/images/9948044/425x286.aspx')
+      request('https://httpbin.org/redirect-to?url=%2Fimage%2Fjpeg')
     end
   end
 
@@ -202,7 +192,7 @@ module CamoProxyTests
   end
 
   def test_follows_temporary_redirects
-    response = request('http://bit.ly/1l9Fztb')
+    response = request('https://httpbin.org/redirect-to?status_code=302&url=https%3A%2F%2Fhttpbin.org%2Fimage%2Fjpeg')
     assert_equal(200, response.code)
   end
 

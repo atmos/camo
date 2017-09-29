@@ -273,6 +273,6 @@ server = Http.createServer (req, resp) ->
     else
       four_oh_four(resp, "No pathname provided on the server")
 
-console.log "SSL-Proxy running on #{port} with pid:#{process.pid} version:#{version}."
+console.log "SSL-Proxy running on #{port} with node:#{process.version} pid:#{process.pid} version:#{version}."
 
 server.listen port
