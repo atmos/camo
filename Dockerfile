@@ -1,4 +1,4 @@
-FROM node:8.4
+FROM node:8.9
 
 RUN mkdir -p /opt/camo/
 WORKDIR /opt/camo/
