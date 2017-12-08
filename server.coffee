@@ -256,7 +256,7 @@ server = Http.createServer (req, resp) ->
 
       hmac_digest = hmac.digest('hex')
 
-      if hmac_digest == query_digest
+      if Crypto.timingSafeEqual(Buffer.from(hmac_digest), Buffer.from(query_digest))
         url = Url.parse dest_url
 
         process_url url, transferredHeaders, resp, max_redirects
