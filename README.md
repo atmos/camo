@@ -88,7 +88,7 @@ A `Dockerfile` is included, you can build and run it with:
 
 ```bash
 docker build -t camo .
-docker run --env CAMO_KEY=YOUR_KEY -t camo
+docker run -p 8081:8081 --env CAMO_KEY=YOUR_KEY -t camo
 ```
 
 ## Examples
