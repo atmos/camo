@@ -240,7 +240,7 @@
   };
 
   server = Http.createServer(function(req, resp) {
-    var base, dest_url, encoded_url, error, hmac, hmac_digest, query_digest, ref, ref1, ref2, transferredHeaders, url, url_type, user_agent;
+    var base, dest_url, e, encoded_url, error, hmac, hmac_digest, query_digest, ref, ref1, ref2, transferredHeaders, url, url_type, user_agent;
     if (req.method !== 'GET' || req.url === '/') {
       resp.writeHead(200, default_security_headers);
       return resp.end('hwhat');
@@ -293,11 +293,20 @@
           return four_oh_four(resp, "could not create checksum");
         }
         hmac_digest = hmac.digest('hex');
-        if (Crypto.timingSafeEqual(Buffer.from(hmac_digest), Buffer.from(query_digest))) {
-          url = Url.parse(dest_url);
-          return process_url(url, transferredHeaders, resp, max_redirects);
-        } else {
-          return four_oh_four(resp, "checksum mismatch " + hmac_digest + ":" + query_digest);
+        try {
+          if (Crypto.timingSafeEqual(Buffer.from(hmac_digest), Buffer.from(query_digest))) {
+            url = Url.parse(dest_url);
+            return process_url(url, transferredHeaders, resp, max_redirects);
+          } else {
+            return four_oh_four(resp, "checksum mismatch " + hmac_digest + ":" + query_digest);
+          }
+        } catch (error1) {
+          e = error1;
+          if (e instanceof TypeError) {
+            return four_oh_four(resp, "could not compare checksum");
+          } else {
+            throw e;
+          }
         }
       } else {
         return four_oh_four(resp, "No pathname provided on the server");
