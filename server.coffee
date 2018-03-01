@@ -16,6 +16,7 @@ logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
 
 content_length_limit = parseInt(process.env.CAMO_LENGTH_LIMIT || 5242880, 10)
+content_length_limit_redirect = process.env.CAMO_LENGTH_LIMIT_REDIRECT || null
 
 accepted_image_mime_types = JSON.parse(Fs.readFileSync(
   Path.resolve(__dirname, "mime-types.json"),
@@ -55,6 +56,18 @@ four_oh_four = (resp, msg, url) ->
     "Strict-Transport-Security" : default_security_headers["Strict-Transport-Security"]
 
   finish resp, "Not Found"
+
+three_oh_three = (resp, location) ->
+  resp.writeHead 303,
+    "Location" : location
+
+  finish resp, "See Other"
+
+content_length_exceeded = (resp, msg, url) ->
+  if content_length_limit_redirect?
+    three_oh_three(resp, content_length_limit_redirect)
+  else
+    four_oh_four(resp, msg, url)
 
 finish = (resp, str) ->
   current_connections -= 1
@@ -96,7 +109,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
       if content_length > content_length_limit
         srcResp.destroy()
-        four_oh_four(resp, "Content-Length exceeded", url)
+        content_length_exceeded(resp, "Content-Length exceeded", url)
       else
         newHeaders =
           'content-type'              : srcResp.headers['content-type']
