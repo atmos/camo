@@ -267,6 +267,9 @@
     } else if (req.url === '/status') {
       resp.writeHead(200, default_security_headers);
       return resp.end("ok " + current_connections + "/" + total_connections + " since " + (started_at.toString()));
+    } else if (req.url === '/_health/') {
+      resp.writeHead(200, default_security_headers);
+      return resp.end('ok');
     } else {
       total_connections += 1;
       current_connections += 1;
