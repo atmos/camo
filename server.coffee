@@ -99,7 +99,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
         four_oh_four(resp, "Content-Length exceeded", url)
       else
         newHeaders =
-          'content-type'              : srcResp.headers['content-type']
+          'content-type'              : srcResp.headers['content-type'] || ''
           'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
           'Camo-Host'                 : camo_hostname
           'X-Frame-Options'           : default_security_headers['X-Frame-Options']
@@ -154,6 +154,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
           when 304
             srcResp.destroy()
             resp.writeHead srcResp.statusCode, newHeaders
+            finish resp
           else
             contentType = newHeaders['content-type']
 
