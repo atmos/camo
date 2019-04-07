@@ -52,6 +52,14 @@ module CamoProxyTests
     assert_equal(200, response.code)
   end
 
+  def test_proxy_survives_not_modified_without_content_type
+    spawn_server(:not_modified) do |host|
+      assert_raise RestClient::NotModified do
+        request("http://#{host}/octocat.jpg")
+      end
+    end
+  end
+
   def test_follows_https_redirect_for_image_links
     response = request('https://user-images.githubusercontent.com/38/30243591-b332eb8a-9561-11e7-8b8c-cad1fe0c821c.jpg')
     assert_equal(200, response.code)
