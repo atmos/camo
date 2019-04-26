@@ -1,4 +1,4 @@
-FROM node:8.4-alpine
+FROM node:8.9-alpine
 
 WORKDIR /opt/camo/
 ADD ${PWD} /opt/camo/
