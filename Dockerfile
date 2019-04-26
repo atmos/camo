@@ -1,10 +1,7 @@
 FROM node:8.4
 
 WORKDIR /opt/camo/
-
-ADD package.json /opt/camo/
-ADD server.js /opt/camo/
-ADD mime-types.json /opt/camo/
+ADD ${PWD} /opt/camo/
 
 EXPOSE 8081
 

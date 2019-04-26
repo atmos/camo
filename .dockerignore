@@ -1,0 +1,5 @@
+# Ignore everything except for the files required to run Camo
+**
+!mime-types.json
+!package.json
+!server.js
