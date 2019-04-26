@@ -1,6 +1,5 @@
 FROM node:8.4
 
-RUN mkdir -p /opt/camo/
 WORKDIR /opt/camo/
 
 ADD package.json /opt/camo/
