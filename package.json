@@ -1,11 +1,14 @@
 {
   "name": "camo",
+  "description": "An http proxy to route images through SSL.",
   "version": "2.3.0",
+  "repository": "git@github.com:atmos/camo.git",
+  "license": "MIT",
   "dependencies": {},
   "engines": {
     "node": "^6.11.1"
   },
   "devDependencies": {
-    "coffee-script": "^1.12.6"
+    "coffeescript": "^1.12.6"
   }
 }
