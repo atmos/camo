@@ -1,10 +1,9 @@
-FROM node:8.9-alpine
+FROM node:10.15.3-alpine
 
 WORKDIR /opt/camo/
-ADD ${PWD} /opt/camo/
+COPY ${PWD} /opt/camo/
+
+RUN npm install && npm cache clean --force
 
 EXPOSE 8081
-
-RUN npm install
-USER nobody
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
