@@ -1,4 +1,4 @@
-FROM node:10.15.3-alpine
+FROM node:10-alpine
 
 WORKDIR /opt/camo/
 COPY ${PWD} /opt/camo/
