@@ -2,7 +2,7 @@ Fs          = require 'fs'
 Path        = require 'path'
 Url         = require 'url'
 Http        = require 'http'
-Https       = require 'https'
+Request     = require 'request'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
@@ -63,11 +63,7 @@ finish = (resp, str) ->
 
 process_url = (url, transferredHeaders, resp, remaining_redirects) ->
   if url.host?
-    if url.protocol is 'https:'
-      Protocol = Https
-    else if url.protocol is 'http:'
-      Protocol = Http
-    else
+    if (url.protocol != 'https:') and  (url.protocol != 'http:')
       four_oh_four(resp, "Unknown protocol", url)
       return
 
@@ -76,110 +72,115 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       queryPath += "?#{url.query}"
 
     transferredHeaders.host = url.host
+    transferredHeaders['User-Agent'] = 'request'
+
     debug_log transferredHeaders
 
     requestOptions =
       hostname: url.hostname
       port: url.port
       path: queryPath
+      uri: url.href
       headers: transferredHeaders
+      timeout: socket_timeout * 1000
 
     if keep_alive == "false"
       requestOptions['agent'] = false
 
-    srcReq = Protocol.get requestOptions, (srcResp) ->
-      is_finished = true
+    srcReq = Request.get requestOptions
+      .on 'error', (error) ->
+        if error.code is 'ETIMEDOUT'
+          # Aborting request due to timeout
+          return four_oh_four resp, "Socket timeout", url
 
-      debug_log srcResp.headers
+        return four_oh_four(resp, "Client Request error #{error.stack}", url)
 
-      content_length = srcResp.headers['content-length']
+      .on 'response', (srcResp) ->
+        is_finished = true
 
-      if content_length > content_length_limit
-        srcResp.destroy()
-        four_oh_four(resp, "Content-Length exceeded", url)
-      else
-        newHeaders =
-          'content-type'              : srcResp.headers['content-type']
-          'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
-          'Camo-Host'                 : camo_hostname
-          'X-Frame-Options'           : default_security_headers['X-Frame-Options']
-          'X-XSS-Protection'          : default_security_headers['X-XSS-Protection']
-          'X-Content-Type-Options'    : default_security_headers['X-Content-Type-Options']
-          'Content-Security-Policy'   : default_security_headers['Content-Security-Policy']
-          'Strict-Transport-Security' : default_security_headers['Strict-Transport-Security']
+        debug_log srcResp.headers
 
-        if eTag = srcResp.headers['etag']
-          newHeaders['etag'] = eTag
+        content_length = srcResp.headers['content-length']
 
-        if expiresHeader = srcResp.headers['expires']
-          newHeaders['expires'] = expiresHeader
+        if content_length > content_length_limit
+          srcResp.destroy()
+          four_oh_four(resp, "Content-Length exceeded", url)
+        else
+          newHeaders =
+            'content-type'              : srcResp.headers['content-type']
+            'cache-control'             : srcResp.headers['cache-control'] || 'public, max-age=31536000'
+            'Camo-Host'                 : camo_hostname
+            'X-Frame-Options'           : default_security_headers['X-Frame-Options']
+            'X-XSS-Protection'          : default_security_headers['X-XSS-Protection']
+            'X-Content-Type-Options'    : default_security_headers['X-Content-Type-Options']
+            'Content-Security-Policy'   : default_security_headers['Content-Security-Policy']
+            'Strict-Transport-Security' : default_security_headers['Strict-Transport-Security']
 
-        if lastModified = srcResp.headers['last-modified']
-          newHeaders['last-modified'] = lastModified
+          if eTag = srcResp.headers['etag']
+            newHeaders['etag'] = eTag
 
-        if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
-          newHeaders['Timing-Allow-Origin'] = origin
+          if expiresHeader = srcResp.headers['expires']
+            newHeaders['expires'] = expiresHeader
 
-        # Handle chunked responses properly
-        if content_length?
-          newHeaders['content-length'] = content_length
-        if srcResp.headers['transfer-encoding']
-          newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
-        if srcResp.headers['content-encoding']
-          newHeaders['content-encoding'] = srcResp.headers['content-encoding']
+          if lastModified = srcResp.headers['last-modified']
+            newHeaders['last-modified'] = lastModified
 
-        srcResp.on 'end', ->
-          if is_finished
-            finish resp
-        srcResp.on 'error', ->
-          if is_finished
-            finish resp
+          if origin = process.env.CAMO_TIMING_ALLOW_ORIGIN
+            newHeaders['Timing-Allow-Origin'] = origin
 
-        switch srcResp.statusCode
-          when 301, 302, 303, 307
-            srcResp.destroy()
-            if remaining_redirects <= 0
-              four_oh_four(resp, "Exceeded max depth", url)
-            else if !srcResp.headers['location']
-              four_oh_four(resp, "Redirect with no location", url)
+          # Handle chunked responses properly
+          if content_length?
+            newHeaders['content-length'] = content_length
+          if srcResp.headers['transfer-encoding']
+            newHeaders['transfer-encoding'] = srcResp.headers['transfer-encoding']
+          if srcResp.headers['content-encoding']
+            newHeaders['content-encoding'] = srcResp.headers['content-encoding']
+
+          srcResp.on 'end', ->
+            if is_finished
+              finish resp
+          srcResp.on 'error', ->
+            if is_finished
+              finish resp
+
+          switch srcResp.statusCode
+            when 301, 302, 303, 307
+              srcResp.destroy()
+              if remaining_redirects <= 0
+                four_oh_four(resp, "Exceeded max depth", url)
+              else if !srcResp.headers['location']
+                four_oh_four(resp, "Redirect with no location", url)
+              else
+                is_finished = false
+                newUrl = Url.parse srcResp.headers['location']
+                unless newUrl.host? and newUrl.hostname?
+                  newUrl.host = newUrl.hostname = url.hostname
+                  newUrl.protocol = url.protocol
+
+                debug_log "Redirected to #{newUrl.format()}"
+                process_url newUrl, transferredHeaders, resp, remaining_redirects - 1
+            when 304
+              srcResp.destroy()
+              resp.writeHead srcResp.statusCode, newHeaders
             else
-              is_finished = false
-              newUrl = Url.parse srcResp.headers['location']
-              unless newUrl.host? and newUrl.hostname?
-                newUrl.host = newUrl.hostname = url.hostname
-                newUrl.protocol = url.protocol
+              contentType = newHeaders['content-type']
 
-              debug_log "Redirected to #{newUrl.format()}"
-              process_url newUrl, transferredHeaders, resp, remaining_redirects - 1
-          when 304
-            srcResp.destroy()
-            resp.writeHead srcResp.statusCode, newHeaders
-          else
-            contentType = newHeaders['content-type']
+              unless contentType?
+                srcResp.destroy()
+                four_oh_four(resp, "No content-type returned", url)
+                return
 
-            unless contentType?
-              srcResp.destroy()
-              four_oh_four(resp, "No content-type returned", url)
-              return
+              contentTypePrefix = contentType.split(";")[0].toLowerCase()
 
-            contentTypePrefix = contentType.split(";")[0].toLowerCase()
+              unless contentTypePrefix in accepted_image_mime_types
+                srcResp.destroy()
+                four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
+                return
 
-            unless contentTypePrefix in accepted_image_mime_types
-              srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
-              return
+              debug_log newHeaders
 
-            debug_log newHeaders
-
-            resp.writeHead srcResp.statusCode, newHeaders
-            srcResp.pipe resp
-
-    srcReq.setTimeout (socket_timeout * 1000), ->
-      srcReq.abort()
-      four_oh_four resp, "Socket timeout", url
-
-    srcReq.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}", url)
+              resp.writeHead srcResp.statusCode, newHeaders
+              srcResp.pipe resp
 
     resp.on 'close', ->
       error_log("Request aborted")

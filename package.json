@@ -1,7 +1,9 @@
 {
   "name": "camo",
   "version": "2.3.0",
-  "dependencies": {},
+  "dependencies": {
+    "request": "^2.88.0"
+  },
   "engines": {
     "node": "^6.11.1"
   },
