@@ -6,6 +6,7 @@ Request     = require 'request'
 Crypto      = require 'crypto'
 QueryString = require 'querystring'
 
+proxy_url       = process.env.PROXY_URL
 port            = parseInt process.env.PORT        || 8081, 10
 version         = require(Path.resolve(__dirname, "package.json")).version
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
@@ -83,6 +84,9 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       uri: url.href
       headers: transferredHeaders
       timeout: socket_timeout * 1000
+
+    if proxy_url?
+      requestOptions['proxy'] = proxy_url
 
     if keep_alive == "false"
       requestOptions['agent'] = false

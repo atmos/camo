@@ -42,6 +42,7 @@ that the resulting value includes only characters `[0-9a-f]`.
 
 Camo is configured through environment variables.
 
+* `PROXY_URL`: When provided, the requests to get the images will be proxied through this proxy_url.
 * `PORT`: The port number Camo should listen on. (default: 8081)
 * `CAMO_HEADER_VIA`: The string for Camo to include in the `Via` and `User-Agent` headers it sends in requests to origin servers. (default: `Camo Asset Proxy <version>`)
 * `CAMO_KEY`: A shared key consisting of a random string, used to generate the HMAC digest.
