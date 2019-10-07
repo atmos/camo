@@ -44,8 +44,8 @@ default_security_headers =
   "Content-Security-Policy": "default-src 'none'; img-src data:; style-src 'unsafe-inline'"
   "Strict-Transport-Security" : "max-age=31536000; includeSubDomains"
 
-four_oh_four = (resp, msg, url) ->
-  error_log "#{msg}: #{url?.format() or 'unknown'}"
+four_oh_four = (resp, msg, url, error) ->
+  error_log "#{msg}#{error? or ''}: #{url?.format() or 'unknown'}"
   resp.writeHead 404,
     expires: "0"
     "Cache-Control": "no-cache, no-store, private, must-revalidate"
@@ -54,6 +54,7 @@ four_oh_four = (resp, msg, url) ->
     "X-Content-Type-Options"    : default_security_headers["X-Content-Type-Options"]
     "Content-Security-Policy"   : default_security_headers["Content-Security-Policy"]
     "Strict-Transport-Security" : default_security_headers["Strict-Transport-Security"]
+    "Camo-Error-Message"        : msg
 
   finish resp, "Not Found"
 
@@ -179,7 +180,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 
             unless contentTypePrefix in accepted_image_mime_types
               srcResp.destroy()
-              four_oh_four(resp, "Non-Image content-type returned '#{contentTypePrefix}'", url)
+              four_oh_four(resp, "Non-Image content-type returned (#{contentTypePrefix})", url)
               return
 
             debug_log newHeaders
@@ -192,7 +193,7 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
       four_oh_four resp, "Socket timeout", url
 
     srcReq.on 'error', (error) ->
-      four_oh_four(resp, "Client Request error #{error.stack}", url)
+      four_oh_four(resp, "Client Request error", url, error.stack)
 
     resp.on 'close', ->
       error_log("Request aborted")
@@ -277,7 +278,7 @@ server = Http.createServer (req, resp) ->
 
         process_url url, transferredHeaders, resp, max_redirects
       else
-        four_oh_four(resp, "checksum mismatch #{hmac_digest}:#{query_digest}")
+        four_oh_four(resp, "checksum mismatch", "", "#{hmac_digest}:#{query_digest}")
     else
       four_oh_four(resp, "No pathname provided on the server")
 
