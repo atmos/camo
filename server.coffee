@@ -11,6 +11,7 @@ version         = require(Path.resolve(__dirname, "package.json")).version
 shared_key      = process.env.CAMO_KEY             || '0x24FEEDFACEDEADBEEFCAFE'
 max_redirects   = process.env.CAMO_MAX_REDIRECTS   || 4
 camo_hostname   = process.env.CAMO_HOSTNAME        || "unknown"
+socket          = process.env.CAMO_SOCKET
 socket_timeout  = process.env.CAMO_SOCKET_TIMEOUT  || 10
 logging_enabled = process.env.CAMO_LOGGING_ENABLED || "disabled"
 keep_alive = process.env.CAMO_KEEP_ALIVE || "false"
@@ -282,6 +283,6 @@ server = Http.createServer (req, resp) ->
     else
       four_oh_four(resp, "No pathname provided on the server")
 
-console.log "SSL-Proxy running on #{port} with node:#{process.version} pid:#{process.pid} version:#{version}."
+console.log "SSL-Proxy running on #{socket? or port} with node:#{process.version} pid:#{process.pid} version:#{version}."
 
-server.listen port
+server.listen socket? or port
