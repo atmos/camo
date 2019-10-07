@@ -69,8 +69,8 @@
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
   };
 
-  four_oh_four = function(resp, msg, url) {
-    error_log(msg + ": " + ((url != null ? url.format() : void 0) || 'unknown'));
+  four_oh_four = function(resp, msg, url, error) {
+    error_log("" + msg + ((error != null) || '') + ": " + ((url != null ? url.format() : void 0) || 'unknown'));
     resp.writeHead(404, {
       expires: "0",
       "Cache-Control": "no-cache, no-store, private, must-revalidate",
@@ -78,7 +78,8 @@
       "X-XSS-Protection": default_security_headers["X-XSS-Protection"],
       "X-Content-Type-Options": default_security_headers["X-Content-Type-Options"],
       "Content-Security-Policy": default_security_headers["Content-Security-Policy"],
-      "Strict-Transport-Security": default_security_headers["Strict-Transport-Security"]
+      "Strict-Transport-Security": default_security_headers["Strict-Transport-Security"],
+      "Camo-Error-Message": msg
     });
     return finish(resp, "Not Found");
   };
@@ -216,7 +217,7 @@
               contentTypePrefix = contentType.split(";")[0].toLowerCase();
               if (indexOf.call(accepted_image_mime_types, contentTypePrefix) < 0) {
                 srcResp.destroy();
-                four_oh_four(resp, "Non-Image content-type returned '" + contentTypePrefix + "'", url);
+                four_oh_four(resp, "Non-Image content-type returned (" + contentTypePrefix + ")", url);
                 return;
               }
               debug_log(newHeaders);
@@ -230,7 +231,7 @@
         return four_oh_four(resp, "Socket timeout", url);
       });
       srcReq.on('error', function(error) {
-        return four_oh_four(resp, "Client Request error " + error.stack, url);
+        return four_oh_four(resp, "Client Request error", url, error.stack);
       });
       resp.on('close', function() {
         error_log("Request aborted");
@@ -317,7 +318,7 @@
           url = Url.parse(dest_url);
           return process_url(url, transferredHeaders, resp, max_redirects);
         } else {
-          return four_oh_four(resp, "checksum mismatch " + hmac_digest + ":" + query_digest);
+          return four_oh_four(resp, "checksum mismatch", "", hmac_digest + ":" + query_digest);
         }
       } else {
         return four_oh_four(resp, "No pathname provided on the server");
