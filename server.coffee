@@ -194,7 +194,8 @@ process_url = (url, transferredHeaders, resp, remaining_redirects) ->
 # decode a string of two char hex digits
 hexdec = (str) ->
   if str and str.length > 0 and str.length % 2 == 0 and not str.match(/[^0-9a-f]/)
-    buf = new Buffer(str.length / 2)
+    size = str.length / 2
+    buf = if Buffer.allocUnsafe then Buffer.allocUnsafe(size) else new Buffer(size)
     for i in [0...str.length] by 2
       buf[i/2] = parseInt(str[i..i+1], 16)
     buf.toString()
