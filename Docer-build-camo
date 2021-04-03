@@ -1,0 +1,2 @@
+docker build -t camo
+docker run --env CAMO_KEY=MASOUDSHOKOHI_KEY -t coma
